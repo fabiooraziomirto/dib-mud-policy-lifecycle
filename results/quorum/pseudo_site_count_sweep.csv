@@ -1,0 +1,5 @@
+site_count,observed_macro,staged_macro,retention_pct,accepted_facts,seed,config
+2,0.124485,0.087859,70.57,457,42,configs/graph_free_selected.yaml
+3,0.124485,0.078633,63.17,446,42,configs/graph_free_selected.yaml
+5,0.124485,0.083097,66.75,418,42,configs/graph_free_selected.yaml
+10,0.124485,0.078633,63.17,349,42,configs/graph_free_selected.yaml

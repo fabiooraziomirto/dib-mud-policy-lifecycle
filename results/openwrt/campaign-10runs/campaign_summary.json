@@ -1,0 +1,111 @@
+{
+  "campaign": "openwrt_osmud_post_freeze",
+  "completed_runs": 10,
+  "finished_utc": "2026-08-12T09:29:57.866397+00:00",
+  "minimum_available_kib": 8388608,
+  "requested_runs": 10,
+  "runs": [
+    {
+      "artifact_dir": "run-01",
+      "available_kib_after": 63348812,
+      "available_kib_before": 63385628,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 1,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-02",
+      "available_kib_after": 63354128,
+      "available_kib_before": 63348976,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 2,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-03",
+      "available_kib_after": 63355808,
+      "available_kib_before": 63354208,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 3,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-04",
+      "available_kib_after": 63356540,
+      "available_kib_before": 63355944,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 4,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-05",
+      "available_kib_after": 63353660,
+      "available_kib_before": 63356540,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 5,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-06",
+      "available_kib_after": 63353000,
+      "available_kib_before": 63353660,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 6,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-07",
+      "available_kib_after": 63355540,
+      "available_kib_before": 63353116,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 7,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-08",
+      "available_kib_after": 63345208,
+      "available_kib_before": 63355284,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 8,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-09",
+      "available_kib_after": 63347944,
+      "available_kib_before": 63345208,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 9,
+      "status": "pass"
+    },
+    {
+      "artifact_dir": "run-10",
+      "available_kib_after": 63343432,
+      "available_kib_before": 63347976,
+      "manifest_sha256": "a5c80c9b16fddc6fc25a42272eae73e5a1b0ec3a3b3e0e93d6839e5f95bc0e87",
+      "result_sha256": "eaa82b402d4050e0790879b2f59a09287dce81b23824c1db7d8a1432cc1e87b2",
+      "returncode": 0,
+      "run": 10,
+      "status": "pass"
+    }
+  ],
+  "started_utc": "2026-08-12T09:12:59.117610+00:00",
+  "status": "pass"
+}

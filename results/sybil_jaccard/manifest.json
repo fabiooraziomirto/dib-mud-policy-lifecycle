@@ -1,0 +1,27 @@
+{
+  "calibration_observations": "experiments/16_combined_bugfix_rerun/governance_bootstrap/calibration_observations.csv",
+  "config_file": "configs/graph_free_selected.yaml",
+  "experiment": "sybil_padding_sweep",
+  "jaccard_sample_size_arg": 0,
+  "observations": "/root/Desktop/DIB/data/processed/observations_enriched.csv",
+  "padding_fractions": [
+    0.0,
+    0.1,
+    0.25,
+    0.5
+  ],
+  "real_endpoint_pool": 20,
+  "seed": 42,
+  "similarity_thresholds": [
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    0.95
+  ],
+  "site_count": 10,
+  "spread_days": 400,
+  "sybil_site_count": 3200,
+  "target_device_type": "AugustDoorBell",
+  "wall_seconds": 609.5
+}

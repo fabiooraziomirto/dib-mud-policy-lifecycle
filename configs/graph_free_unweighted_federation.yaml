@@ -1,0 +1,16 @@
+outputs:
+  root: outputs/tnsm_submission_2026
+experiments:
+  observations_csv: data/processed/observations_enriched.csv
+  seed: 42
+scoring:
+  alpha: 0.6
+  beta: 0.4
+  gamma: 0.0
+  theta: 0.65
+  min_reporting_sites: 2  # |S_e| >= 2, corroboration quorum (Sec. IV-B; review fix 2026-07-24)
+  graph_enabled: false
+  trust_weighted: false
+baselines:
+  weighted_threshold: 0.6
+  frequency_min_count: 2

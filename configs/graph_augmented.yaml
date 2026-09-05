@@ -1,0 +1,51 @@
+outputs:
+  root: outputs
+
+experiments:
+  observations_csv: data/processed/observations.csv
+  seed: 42
+  site_counts: [10, 50, 100, 500, 1000]
+  malicious_site_fractions: [0.01, 0.05, 0.10, 0.20, 0.30]
+  firmware_adoption_fractions: [0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00]
+  cold_start_window_days: [0, 1, 3, 7, 14, 30, 60, 120]
+  drift_promote_fraction: 0.60
+  drift_attack_spread_days: [1, 30, 120]
+  lifecycle_checkpoint_fractions: [0.01, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00]
+  sybil_site_counts: [1, 2, 5, 10, 20, 50, 100, 200, 400, 800, 1600]
+  adaptive_sybil_spread_days: [1, 5, 10, 20, 40, 80, 120, 140, 160, 180, 200, 250, 500, 1000]
+  # Cross-strategy comparison uses only the start, pre-breakpoint, located
+  # breakpoint, and maximum-cost points; the dense adaptive curve above remains
+  # the source for breakpoint localization.
+  management_attack_adaptive_days: [1, 120, 140, 1000]
+  registry_query_repeats: 30
+  attestation_cost_max_endpoints: 30
+  fingerprint_error_rates: [0.01, 0.05, 0.10, 0.20, 0.30]
+  # Combined bounded-poisoner + adaptive-Sybil overlay (TDSC roadmap P1 #6):
+  # both attacks corroborate the SAME fake endpoint, the worst case for the
+  # defender. spread_days is a subset of adaptive_sybil_spread_days chosen to
+  # bracket the known 140-day vanilla breakdown point.
+  combined_attack_malicious_fractions: [0.10, 0.20]
+  combined_attack_spread_days: [1, 40, 120, 140, 180, 1000]
+  # Diversified-Sybil padding sweep (TDSC roadmap P1 #6, anti-clustering /
+  # breadth-fabrication adversary): 0 reproduces the templated-Sybil baseline.
+  diversified_sybil_padding: [0, 1, 3, 5, 10]
+
+scoring:
+  alpha: 0.5
+  beta: 0.3
+  gamma: 0.2
+  theta: 0.65
+  min_reporting_sites: 2  # |S_e| >= 2, corroboration quorum (Sec. IV-B; review fix 2026-07-24)
+
+baselines:
+  weighted_threshold: 0.6
+  frequency_min_count: 2
+
+ablation:
+  components: [site, temporal, graph]
+
+sensitivity:
+  alpha: [0.3, 0.4, 0.5, 0.6, 0.7]
+  beta: [0.1, 0.2, 0.3, 0.4, 0.5]
+  gamma: [0.0, 0.1, 0.2, 0.3, 0.4]
+  theta: [0.5, 0.55, 0.6, 0.65, 0.7, 0.75]

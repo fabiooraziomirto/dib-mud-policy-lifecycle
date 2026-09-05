@@ -1,0 +1,8 @@
+stage,scope,matched_aces,total_aces,micro_share,macro_share,devices_with_any_match,total_devices
+all_reference_aces,reference,564,564,1.0,1.0,28,28
+direction_from_device,reference,503,564,0.891844,0.833853,28,28
+class_eligible,reference,559,564,0.991135,0.994082,28,28
+observed_in_capture_raw,capture,93,564,0.164894,0.225972,27,28
+observed_in_capture,capture,55,564,0.097518,0.124485,18,28
+staged_by_dib,pipeline,36,564,0.06383,0.078633,14,28
+staged_by_dib_strict_match,pipeline,36,564,0.06383,0.078633,14,28

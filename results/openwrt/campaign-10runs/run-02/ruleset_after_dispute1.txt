@@ -1,0 +1,126 @@
+table inet fw4 {
+	chain input {
+		type filter hook input priority filter; policy accept;
+		iifname "lo" accept comment "!fw4: Accept traffic from loopback"
+		ct state established,related accept comment "!fw4: Allow inbound established and related flows"
+		iifname "lan0" jump input_lan comment "!fw4: Handle lan IPv4/IPv6 input traffic"
+		iifname { "wan0", "wan1", "wan2" } jump input_wan comment "!fw4: Handle wan IPv4/IPv6 input traffic"
+	}
+
+	chain forward {
+		type filter hook forward priority filter; policy drop;
+		ct state established,related accept comment "!fw4: Allow forwarded established and related flows"
+		iifname "lan0" jump forward_lan comment "!fw4: Handle lan IPv4/IPv6 forward traffic"
+		iifname { "wan0", "wan1", "wan2" } jump forward_wan comment "!fw4: Handle wan IPv4/IPv6 forward traffic"
+		jump handle_reject
+	}
+
+	chain output {
+		type filter hook output priority filter; policy accept;
+		oifname "lo" accept comment "!fw4: Accept traffic towards loopback"
+		ct state established,related accept comment "!fw4: Allow outbound established and related flows"
+		oifname "lan0" jump output_lan comment "!fw4: Handle lan IPv4/IPv6 output traffic"
+		oifname { "wan0", "wan1", "wan2" } jump output_wan comment "!fw4: Handle wan IPv4/IPv6 output traffic"
+	}
+
+	chain prerouting {
+		type filter hook prerouting priority filter; policy accept;
+		iifname "lan0" jump helper_lan comment "!fw4: Handle lan IPv4/IPv6 helper assignment"
+		iifname { "wan0", "wan1", "wan2" } jump helper_wan comment "!fw4: Handle wan IPv4/IPv6 helper assignment"
+	}
+
+	chain handle_reject {
+		meta l4proto tcp reject with tcp reset comment "!fw4: Reject TCP traffic"
+		reject comment "!fw4: Reject any other traffic"
+	}
+
+	chain input_lan {
+		jump accept_from_lan
+	}
+
+	chain output_lan {
+		jump accept_to_lan
+	}
+
+	chain forward_lan {
+		jump reject_to_lan
+	}
+
+	chain helper_lan {
+	}
+
+	chain accept_from_lan {
+		iifname "lan0" counter packets 0 bytes 0 accept comment "!fw4: accept lan IPv4/IPv6 traffic"
+	}
+
+	chain accept_to_lan {
+		oifname "lan0" counter packets 0 bytes 0 accept comment "!fw4: accept lan IPv4/IPv6 traffic"
+	}
+
+	chain reject_to_lan {
+		oifname "lan0" counter packets 0 bytes 0 jump handle_reject comment "!fw4: reject lan IPv4/IPv6 traffic"
+	}
+
+	chain input_wan {
+		jump accept_from_wan
+	}
+
+	chain output_wan {
+		jump accept_to_wan
+	}
+
+	chain forward_wan {
+		jump reject_to_wan
+	}
+
+	chain helper_wan {
+	}
+
+	chain accept_from_wan {
+		iifname { "wan0", "wan1", "wan2" } counter packets 0 bytes 0 accept comment "!fw4: accept wan IPv4/IPv6 traffic"
+	}
+
+	chain accept_to_wan {
+		oifname { "wan0", "wan1", "wan2" } counter packets 3 bytes 168 accept comment "!fw4: accept wan IPv4/IPv6 traffic"
+	}
+
+	chain reject_to_wan {
+		oifname { "wan0", "wan1", "wan2" } counter packets 0 bytes 0 jump handle_reject comment "!fw4: reject wan IPv4/IPv6 traffic"
+	}
+
+	chain dstnat {
+		type nat hook prerouting priority dstnat; policy accept;
+	}
+
+	chain srcnat {
+		type nat hook postrouting priority srcnat; policy accept;
+	}
+
+	chain raw_prerouting {
+		type filter hook prerouting priority raw; policy accept;
+	}
+
+	chain raw_output {
+		type filter hook output priority raw; policy accept;
+	}
+
+	chain mangle_prerouting {
+		type filter hook prerouting priority mangle; policy accept;
+	}
+
+	chain mangle_postrouting {
+		type filter hook postrouting priority mangle; policy accept;
+	}
+
+	chain mangle_input {
+		type filter hook input priority mangle; policy accept;
+	}
+
+	chain mangle_output {
+		type route hook output priority mangle; policy accept;
+	}
+
+	chain mangle_forward {
+		type filter hook forward priority mangle; policy accept;
+	}
+}

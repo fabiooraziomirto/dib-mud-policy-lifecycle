@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_global_restore_preserves_local_veto_and_its_history ___________
+
+    def test_global_restore_preserves_local_veto_and_its_history() -> None:
+        for dispute_count in (1, 2):
+            session = _fresh_session()
+            key = ("camera", "api.vendor.com", "https", 443)
+            try:
+                _seeded_score(session)
+                for site in ("site-a", "site-b"):
+                    services.query_score(session, site, *key)
+                    services.operator_commit(session, site, *key)
+                services.local_revoke(session, "site-a", *key)
+                session.commit()
+                score = services.get_score(session, *key)
+                decision = services.get_local_decision(session, score.id, "site-a")
+                history_before = [v.id for v in services.get_local_decision_history(session, decision.id)]
+                for site in ("site-b", "site-c")[:dispute_count]:
+                    services.dispute_score(session, *key, site)
+                    session.commit()
+                services.restore_score(session, *key, actor_site_id="site-c")
+                session.commit()
+>               assert decision.state == db.DECISION_REVOKED
+E               AssertionError: assert 'monitor-only' == 'revoked'
+E                 
+E                 - revoked
+E                 + monitor-only
+
+code/tests/tests/test_registry.py:420: AssertionError
+=========================== short test summary info ============================
+FAILED code/tests/tests/test_registry.py::test_global_restore_preserves_local_veto_and_its_history
+1 failed, 32 deselected in 1.05s

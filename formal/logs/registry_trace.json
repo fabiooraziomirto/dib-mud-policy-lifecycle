@@ -1,0 +1,75 @@
+{
+  "status": "pass",
+  "scope": "registry service states; trusted harness; no gateway or role-enforcement test",
+  "command": "python code/scripts/v28_lifecycle_trace.py",
+  "steps": [
+    {
+      "event": "approve both",
+      "states": {
+        "receiver": "active",
+        "peer": "active"
+      },
+      "global_status": "active"
+    },
+    {
+      "event": "local revoke",
+      "states": {
+        "receiver": "revoked",
+        "peer": "active"
+      },
+      "global_status": "active"
+    },
+    {
+      "event": "first dispute",
+      "states": {
+        "receiver": "revoked",
+        "peer": "disputed"
+      },
+      "global_status": "disputed"
+    },
+    {
+      "event": "local restore rejected",
+      "states": {
+        "receiver": "revoked",
+        "peer": "disputed"
+      },
+      "global_status": "disputed"
+    },
+    {
+      "event": "second dispute",
+      "states": {
+        "receiver": "revoked",
+        "peer": "revoked"
+      },
+      "global_status": "revoked"
+    },
+    {
+      "event": "global restore",
+      "states": {
+        "receiver": "revoked",
+        "peer": "monitor-only"
+      },
+      "global_status": "active"
+    },
+    {
+      "event": "local restore",
+      "states": {
+        "receiver": "monitor-only",
+        "peer": "monitor-only"
+      },
+      "global_status": "active"
+    },
+    {
+      "event": "fresh local commit",
+      "states": {
+        "receiver": "active",
+        "peer": "monitor-only"
+      },
+      "global_status": "active"
+    }
+  ],
+  "sha256": {
+    "code/scripts/v28_lifecycle_trace.py": "8ab7fce523b7525c1c5e9c9896ce8a7679520eb74b9efbc76f59fe7282597d1d",
+    "code/src/dib/registry/services.py": "bea8a575479e7866438e8248b59b7022c1a475540fa164dee0f838cda12f47be"
+  }
+}

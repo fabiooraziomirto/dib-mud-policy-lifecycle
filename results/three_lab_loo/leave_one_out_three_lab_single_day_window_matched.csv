@@ -1,0 +1,4 @@
+receiving_deployment,source_deployments,independent_source_deployments,min_reporting_sites,target_device_types,admitted_candidates,target_device_coverage,precision_macro,recall_macro,f1_macro,metric_status,receiver_excluded_from_scoring
+US,UK+YT,2,2,6,36,0.8333333333333334,0.75,0.15403383718986555,0.2408600701369621,defined,True
+UK,US+YT,2,2,6,41,0.8333333333333334,0.7857142857142857,0.13368753091951127,0.21282842803421334,defined,True
+YT,US+UK,2,2,6,91,1.0,0.3617132867132867,0.21718469227313567,0.2579182630906769,defined,True

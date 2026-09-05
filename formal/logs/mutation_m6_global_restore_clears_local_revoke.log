@@ -1,0 +1,117 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx4g -XX:+UseParallelGC
+TLC2 Version 2026.05.26.235334 (rev: 4ba7d88)
+Running breadth-first search Model-Checking with fp 62 and seed -4087741853900658570 with 4 workers on 16 cores with 3641MB heap and 64MB offheap memory [pid: 372824] (Linux 6.8.12-18-pve amd64, Ubuntu 17.0.19 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /tmp/tmp.0uqfcLcu2l/DIBMutant.tla
+Parsing file /tmp/tlc-11326500149847665023/Naturals.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-11326500149847665023/FiniteSets.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-11326500149847665023/_TLCTrace.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-11326500149847665023/Sequences.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-11326500149847665023/TLC.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-11326500149847665023/TLCExt.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-11326500149847665023/Integers.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module DIBMutant
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module DIBMutant
+Starting... (2026-09-05 15:28:56)
+Computing initial states...
+Computed 2 initial states...
+Finished computing initial states: 4 distinct states generated at 2026-09-05 15:28:57.
+Error: Action property I3_GlobalRestorePreservesLocalRevoke is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ grantValid = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ state = ( s1 :> (f1 :> "Absent" @@ f2 :> "Absent") @@
+  s2 :> (f1 :> "Absent" @@ f2 :> "Absent") @@
+  s3 :> (f1 :> "Absent" @@ f2 :> "Absent") )
+/\ exported = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ revokeReason = ( s1 :> (f1 :> "None" @@ f2 :> "None") @@
+  s2 :> (f1 :> "None" @@ f2 :> "None") @@
+  s3 :> (f1 :> "None" @@ f2 :> "None") )
+/\ lastOp = [op |-> "Init", site |-> none, fact |-> nofact]
+/\ disputers = (f1 :> {} @@ f2 :> {})
+/\ admissible = (f1 :> TRUE @@ f2 :> TRUE)
+
+State 2: <Query(s1,f1) line 89, col 5 to line 94, col 26 of module DIBMutant>
+/\ grantValid = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ state = ( s1 :> (f1 :> "MonitorOnly" @@ f2 :> "Absent") @@
+  s2 :> (f1 :> "Absent" @@ f2 :> "Absent") @@
+  s3 :> (f1 :> "Absent" @@ f2 :> "Absent") )
+/\ exported = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ revokeReason = ( s1 :> (f1 :> "None" @@ f2 :> "None") @@
+  s2 :> (f1 :> "None" @@ f2 :> "None") @@
+  s3 :> (f1 :> "None" @@ f2 :> "None") )
+/\ lastOp = [op |-> "Query", site |-> s1, fact |-> f1]
+/\ disputers = (f1 :> {} @@ f2 :> {})
+/\ admissible = (f1 :> TRUE @@ f2 :> TRUE)
+
+State 3: <LocalRevoke(s1,f1) line 171, col 5 to line 177, col 32 of module DIBMutant>
+/\ grantValid = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ state = ( s1 :> (f1 :> "Revoked" @@ f2 :> "Absent") @@
+  s2 :> (f1 :> "Absent" @@ f2 :> "Absent") @@
+  s3 :> (f1 :> "Absent" @@ f2 :> "Absent") )
+/\ exported = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ revokeReason = ( s1 :> (f1 :> "Local" @@ f2 :> "None") @@
+  s2 :> (f1 :> "None" @@ f2 :> "None") @@
+  s3 :> (f1 :> "None" @@ f2 :> "None") )
+/\ lastOp = [op |-> "LocalRevoke", site |-> s1, fact |-> f1]
+/\ disputers = (f1 :> {} @@ f2 :> {})
+/\ admissible = (f1 :> TRUE @@ f2 :> TRUE)
+
+State 4: <Dispute(s1,f1) line 123, col 5 to line 139, col 28 of module DIBMutant>
+/\ grantValid = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ state = ( s1 :> (f1 :> "Revoked" @@ f2 :> "Absent") @@
+  s2 :> (f1 :> "Absent" @@ f2 :> "Absent") @@
+  s3 :> (f1 :> "Absent" @@ f2 :> "Absent") )
+/\ exported = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ revokeReason = ( s1 :> (f1 :> "Local" @@ f2 :> "None") @@
+  s2 :> (f1 :> "None" @@ f2 :> "None") @@
+  s3 :> (f1 :> "None" @@ f2 :> "None") )
+/\ lastOp = [op |-> "Dispute", site |-> s1, fact |-> f1]
+/\ disputers = (f1 :> {s1} @@ f2 :> {})
+/\ admissible = (f1 :> TRUE @@ f2 :> TRUE)
+
+State 5: <Restore(s1,f1) line 146, col 5 to line 159, col 28 of module DIBMutant>
+/\ grantValid = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ state = ( s1 :> (f1 :> "MonitorOnly" @@ f2 :> "Absent") @@
+  s2 :> (f1 :> "Absent" @@ f2 :> "Absent") @@
+  s3 :> (f1 :> "Absent" @@ f2 :> "Absent") )
+/\ exported = ( s1 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s2 :> (f1 :> FALSE @@ f2 :> FALSE) @@
+  s3 :> (f1 :> FALSE @@ f2 :> FALSE) )
+/\ revokeReason = ( s1 :> (f1 :> "Local" @@ f2 :> "None") @@
+  s2 :> (f1 :> "None" @@ f2 :> "None") @@
+  s3 :> (f1 :> "None" @@ f2 :> "None") )
+/\ lastOp = [op |-> "Restore", site |-> s1, fact |-> f1]
+/\ disputers = (f1 :> {} @@ f2 :> {})
+/\ admissible = (f1 :> TRUE @@ f2 :> TRUE)
+
+18278 states generated, 3765 distinct states found, 3125 states left on queue.
+The depth of the complete state graph search is 5.
+Finished in 00s at (2026-09-05 15:28:57)
+Trace exploration spec path: /tmp/tmp.0uqfcLcu2l/DIBMutant_TTrace_1788614936.tla

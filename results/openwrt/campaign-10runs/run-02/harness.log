@@ -1,0 +1,85 @@
+{"action": "init", "exported_aces": 0}
+{"action": "commit", "exported_aces": 2}
+Sending build context to Docker daemon  10.71kB
+Step 1/17 : FROM alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc AS build
+ ---> bf8527eb54c3
+Step 2/17 : ARG OSMUD_COMMIT=852918eb33f3e15225da4de21d440b5b9a5d875f
+ ---> Using cache
+ ---> a765fc16a1f9
+Step 3/17 : RUN apk add --no-cache build-base git json-c-dev curl-dev curl-static openssl-libs-static     zlib-static zstd-static c-ares-static brotli-static nghttp2-static libidn2-static libpsl-static libunistring-static
+ ---> Using cache
+ ---> a2c5e68fcc30
+Step 4/17 : RUN git clone https://github.com/osmud/osmud.git /src/osmud &&     git -C /src/osmud checkout "$OSMUD_COMMIT" &&     sed -i 's|-o osmud -ljson-c -lcurl|-o osmud -static -ljson-c -lcurl -lssl -lcrypto -lz -lzstd -lcares -lbrotlidec -lbrotlicommon -lnghttp2 -lidn2 -lpsl -lunistring|' /src/osmud/src/Makefile &&     make -C /src/osmud/src clean &&     make -C /src/osmud/src
+ ---> Using cache
+ ---> ee6d8ed0fbef
+Step 5/17 : FROM openwrt/rootfs@sha256:a44cce5d8f3619e30b0b7cf74e236d4e62cb3bf118953f57e044dc684d7cfc36
+ ---> 171c2b44b967
+Step 6/17 : RUN mkdir -p /var/lock && opkg update &&     opkg install firewall4 nftables-json uci curl ca-bundle && rm -rf /var/opkg-lists/*
+ ---> Using cache
+ ---> da749439b41a
+Step 7/17 : COPY --from=build /src/osmud/src/osmud /usr/sbin/osmud
+ ---> Using cache
+ ---> 2d70384c9135
+Step 8/17 : COPY --from=build /src/osmud/src/openwrt/create_ip_fw_rule.sh /etc/osmud/create_ip_fw_rule.sh
+ ---> Using cache
+ ---> e1e1c19effa7
+Step 9/17 : COPY --from=build /src/osmud/src/openwrt/remove_ip_fw_rule.sh /etc/osmud/remove_ip_fw_rule.sh
+ ---> Using cache
+ ---> 29b7c63a5e5a
+Step 10/17 : COPY --from=build /src/osmud/src/openwrt/create_mud_db_entry.sh /etc/osmud/create_mud_db_entry.sh
+ ---> Using cache
+ ---> 7f3368f37bcc
+Step 11/17 : COPY --from=build /src/osmud/src/openwrt/remove_mud_db_entry.sh /etc/osmud/remove_mud_db_entry.sh
+ ---> Using cache
+ ---> 1d37a5ccfd2e
+Step 12/17 : COPY router-entrypoint.sh /usr/local/bin/router-entrypoint.sh
+ ---> Using cache
+ ---> 77c30a504277
+Step 13/17 : COPY commit_ip_fw_rules.sh /etc/osmud/commit_ip_fw_rules.sh
+ ---> Using cache
+ ---> 5b77722334f5
+Step 14/17 : COPY rollback_ip_fw_rules.sh /etc/osmud/rollback_ip_fw_rules.sh
+ ---> Using cache
+ ---> 2395597725c0
+Step 15/17 : RUN chmod +x /usr/sbin/osmud /etc/osmud/*.sh /usr/local/bin/router-entrypoint.sh
+ ---> Using cache
+ ---> 8f5d0cff47dc
+Step 16/17 : ENTRYPOINT ["/bin/sleep", "infinity"]
+ ---> Using cache
+ ---> 2e60845e7548
+Step 17/17 : LABEL com.docker.compose.image.builder=classic
+ ---> Using cache
+ ---> f2ea0befbb33
+Successfully built f2ea0befbb33
+Successfully tagged 18_openwrt_enforcement-router:latest
+ Container 18_openwrt_enforcement-router-1  Creating
+ Container 18_openwrt_enforcement-device-1  Creating
+ Container 18_openwrt_enforcement-blocked-service-1  Creating
+ Container 18_openwrt_enforcement-allowed-service-1  Creating
+ Container 18_openwrt_enforcement-mud-server-1  Creating
+ Container 18_openwrt_enforcement-router-1  Created
+ Container 18_openwrt_enforcement-mud-server-1  Created
+ Container 18_openwrt_enforcement-blocked-service-1  Created
+ Container 18_openwrt_enforcement-device-1  Created
+ Container 18_openwrt_enforcement-allowed-service-1  Created
+ Container 18_openwrt_enforcement-device-1  Starting
+ Container 18_openwrt_enforcement-mud-server-1  Starting
+ Container 18_openwrt_enforcement-router-1  Starting
+ Container 18_openwrt_enforcement-blocked-service-1  Starting
+ Container 18_openwrt_enforcement-allowed-service-1  Starting
+ Container 18_openwrt_enforcement-allowed-service-1  Started
+ Container 18_openwrt_enforcement-router-1  Started
+ Container 18_openwrt_enforcement-device-1  Started
+ Container 18_openwrt_enforcement-blocked-service-1  Started
+ Container 18_openwrt_enforcement-mud-server-1  Started
+curl: (7) Failed to connect to mud-server port 8000 after 0 ms: Error
+curl: (7) Failed to connect to mud-server port 8000 after 0 ms: Error
+curl: (7) Failed to connect to mud-server port 8000 after 0 ms: Error
+curl: (7) Failed to connect to mud-server port 8000 after 0 ms: Error
+curl: (7) Failed to connect to mud-server port 8000 after 0 ms: Error
+curl: (7) Failed to connect to mud-server port 8000 after 0 ms: Error
+{"action": "dispute1", "exported_aces": 0}
+{"action": "dispute2", "exported_aces": 0}
+{"action": "restore", "exported_aces": 0}
+{"action": "commit", "exported_aces": 2}
+PASS: artifacts in /root/Desktop/DIB_reframe/reproducibility/experiments/18_openwrt_enforcement/artifacts/campaign-20260812T091259Z/run-02

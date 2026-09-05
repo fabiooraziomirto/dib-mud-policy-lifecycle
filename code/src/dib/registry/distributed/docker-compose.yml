@@ -1,0 +1,195 @@
+services:
+  evidence:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=evidence
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_DATA_DIR=/data
+      - DIB_DIST_SITE_URL_0=http://site-0:8000
+      - DIB_DIST_SITE_URL_1=http://site-1:8000
+      - DIB_DIST_SITE_URL_2=http://site-2:8000
+      - DIB_DIST_SITE_URL_3=http://site-3:8000
+      - DIB_DIST_SITE_URL_4=http://site-4:8000
+      - DIB_DIST_SITE_URL_5=http://site-5:8000
+      - DIB_DIST_SITE_URL_6=http://site-6:8000
+      - DIB_DIST_SITE_URL_7=http://site-7:8000
+      - DIB_DIST_SITE_URL_8=http://site-8:8000
+      - DIB_DIST_SITE_URL_9=http://site-9:8000
+    volumes:
+      - evidence_data:/data
+    ports:
+      - "18100:8000"
+  site-0:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=0
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_0_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18110:8000"
+  site-1:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=1
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_1_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18111:8000"
+  site-2:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=2
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_2_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18112:8000"
+  site-3:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=3
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_3_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18113:8000"
+  site-4:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=4
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_4_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18114:8000"
+  site-5:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=5
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_5_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18115:8000"
+  site-6:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=6
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_6_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18116:8000"
+  site-7:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=7
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_7_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18117:8000"
+  site-8:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=8
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_8_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18118:8000"
+  site-9:
+    build:
+      context: ../../../..
+      dockerfile: src/dib/registry/distributed/Dockerfile
+    environment:
+      - DIB_DIST_ROLE=site
+      - DIB_DIST_SITE_INDEX=9
+      - DIB_DIST_N_SITES=10
+      - DIB_DIST_EVIDENCE_URL=http://evidence:8000
+      - DIB_DIST_DATA_DIR=/data
+    volumes:
+      - site_9_data:/data
+    depends_on:
+      - evidence
+    ports:
+      - "18119:8000"
+volumes:
+  evidence_data:
+  site_0_data:
+  site_1_data:
+  site_2_data:
+  site_3_data:
+  site_4_data:
+  site_5_data:
+  site_6_data:
+  site_7_data:
+  site_8_data:
+  site_9_data:

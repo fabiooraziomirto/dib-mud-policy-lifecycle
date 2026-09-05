@@ -1,0 +1,25 @@
+loading observations from data/processed/observations_enriched.csv ...
+exclude_non_global_ips=True: filtered to 1268020 observations
+165 real malicious endpoint observations across 5 device types
+scoring_config: ScoringConfig(alpha=0.6, beta=0.4, gamma=0.0, theta=0.65, graph_enabled=False, graph_max_endpoints_per_device=None, trust_weighted=False, trust_reference_breadth=0.0, independence_aware=False, independence_similarity_threshold=0.8, combined_mitigation=False, temporal_quarantine=False, temporal_quarantine_floor=0.0, temporal_quarantine_tenure_days=None)
+  BelkinWemoMotionSensor: swept k=0..10
+  BelkinWemoSwitch: swept k=0..10
+  NetatmoWelcome: swept k=0..10
+  SamsungCamera: swept k=0..10
+  TPLinkSmartPlug: swept k=0..10
+
+wrote outputs/tnsm_submission_2026/table1_compromised_baseline/compromised_baseline_sweep.csv (440 rows)
+wrote outputs/tnsm_submission_2026/table1_compromised_baseline/compromised_baseline_table.csv
+
+strategy                      admission_rate  exceptions/site  benign_F1
+local_only                             0.300            0.000      0.153
+pooled_union                           1.000            0.000      0.148
+majority_registry                      0.000           11.720      0.158
+frequency_filtered_registry            1.000            4.940      0.145
+reputation_weighted_voting             0.000           13.220      0.155
+dib_vanilla                            0.000           30.320      0.087
+dib_trust_weighted                     0.000           30.320      0.087
+dib_independence_aware                 0.000           30.320      0.087
+
+Hypothesis check passed at k=3: every compromised site's own local_only profile admits its real malicious endpoint 100% of the time (aggregate rate = k/site_count exactly), and pooled_union admits it 100% globally -- both by construction, as expected.
+{"label": "table1_sweep", "command": ["python3", "scripts/compromised_baseline.py", "--config", "configs/ref_trust_hyperparams.yaml", "--observations", "data/processed/observations_enriched.csv", "--calibration-observations", "/root/Desktop/DIB_reframe/results/rwv_baseline/governance_bootstrap/calibration_observations.csv", "--rwv-threshold", "0.50", "--site-count", "10", "--partition-strategy", "random", "--headline-k", "3", "--output-dir", "outputs/tnsm_submission_2026/table1_compromised_baseline"], "returncode": 0, "elapsed_seconds": 657.0, "peak_rss_gb": 1.972}

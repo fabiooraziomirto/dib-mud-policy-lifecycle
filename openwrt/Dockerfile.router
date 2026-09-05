@@ -1,0 +1,23 @@
+FROM alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc AS build
+ARG OSMUD_COMMIT=852918eb33f3e15225da4de21d440b5b9a5d875f
+RUN apk add --no-cache build-base git json-c-dev curl-dev curl-static openssl-libs-static \
+    zlib-static zstd-static c-ares-static brotli-static nghttp2-static libidn2-static libpsl-static libunistring-static
+RUN git clone https://github.com/osmud/osmud.git /src/osmud && \
+    git -C /src/osmud checkout "$OSMUD_COMMIT" && \
+    sed -i 's|-o osmud -ljson-c -lcurl|-o osmud -static -ljson-c -lcurl -lssl -lcrypto -lz -lzstd -lcares -lbrotlidec -lbrotlicommon -lnghttp2 -lidn2 -lpsl -lunistring|' /src/osmud/src/Makefile && \
+    make -C /src/osmud/src clean && \
+    make -C /src/osmud/src
+
+FROM openwrt/rootfs@sha256:a44cce5d8f3619e30b0b7cf74e236d4e62cb3bf118953f57e044dc684d7cfc36
+RUN mkdir -p /var/lock && opkg update && \
+    opkg install firewall4 nftables-json uci curl ca-bundle && rm -rf /var/opkg-lists/*
+COPY --from=build /src/osmud/src/osmud /usr/sbin/osmud
+COPY --from=build /src/osmud/src/openwrt/create_ip_fw_rule.sh /etc/osmud/create_ip_fw_rule.sh
+COPY --from=build /src/osmud/src/openwrt/remove_ip_fw_rule.sh /etc/osmud/remove_ip_fw_rule.sh
+COPY --from=build /src/osmud/src/openwrt/create_mud_db_entry.sh /etc/osmud/create_mud_db_entry.sh
+COPY --from=build /src/osmud/src/openwrt/remove_mud_db_entry.sh /etc/osmud/remove_mud_db_entry.sh
+COPY router-entrypoint.sh /usr/local/bin/router-entrypoint.sh
+COPY commit_ip_fw_rules.sh /etc/osmud/commit_ip_fw_rules.sh
+COPY rollback_ip_fw_rules.sh /etc/osmud/rollback_ip_fw_rules.sh
+RUN chmod +x /usr/sbin/osmud /etc/osmud/*.sh /usr/local/bin/router-entrypoint.sh
+ENTRYPOINT ["/bin/sleep", "infinity"]

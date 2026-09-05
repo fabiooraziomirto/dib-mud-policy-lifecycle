@@ -1,0 +1,11 @@
+invariant,trials,violations,unhandled_exceptions,inconsistent_history_count,revoked_first,disputed_first,local_revoke_incorrectly_succeeded,n_writers_per_trial,successful_writes,clean_rejections,elapsed_seconds
+same_site_triple_attest_no_double_count,200,0,0,,,,,,,,7.09
+same_site_double_dispute_never_revokes,200,0,,,,,,,,,4.44
+distinct_site_double_dispute_revokes_exactly_once,200,0,,0,,,,,,,5.19
+operator_commit_vs_confirming_dispute_no_active_and_revoked,200,0,,,,,,,,,4.76
+restore_score_does_not_alter_unrelated_facts,200,0,,,,,,,,,12.08
+append_only_history_no_lost_or_duplicate_events,200,0,,,,,,,,,11.54
+local_revoke_survives_concurrent_dispute,200,0,0,,108,92,,,,,5.5
+local_revoke_does_not_alter_other_sites_decision,200,0,,,,,,,,,4.02
+local_revoke_rejected_during_confirming_dispute,200,0,0,,,,0,,,,5.02
+retry_budget_exhaustion_clean_rejection,25,0,0,,,,,25,625,0,13.8

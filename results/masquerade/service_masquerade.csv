@@ -1,0 +1,19 @@
+case,protocol,port,malicious_fraction,spread_days,endpoint_class,class_eligible,device_type,supporting_sites,eligible_sites,site_confidence,temporal_confidence,score,theta,accepted,blocked_by,quorum_clearing_instances,total_instances
+dns-port,udp,53,0.3,1,dns,True,HelloBarbie,3,10,0.30124,0.432676,0.353815,0.65,False,score,25,27
+dns-port,udp,53,0.3,30,dns,True,HelloBarbie,3,10,0.30124,0.870886,0.529099,0.65,False,score,25,27
+dns-port,udp,53,0.3,120,dns,True,HelloBarbie,3,10,0.30124,0.952336,0.561679,0.65,False,score,25,27
+dns-port,udp,53,0.5,1,dns,True,CanaryCamera,5,10,0.500717,0.4669,0.48719,0.65,False,score,26,27
+dns-port,udp,53,0.5,30,dns,True,HelloBarbie,5,10,0.500717,0.906422,0.662999,0.65,True,none (admitted),26,27
+dns-port,udp,53,0.5,120,dns,True,HelloBarbie,5,10,0.500717,0.969461,0.688215,0.65,True,none (admitted),26,27
+ntp-port,udp,123,0.3,1,ntp,True,HelloBarbie,3,10,0.30124,0.432676,0.353815,0.65,False,score,25,27
+ntp-port,udp,123,0.3,30,ntp,True,HelloBarbie,3,10,0.30124,0.870886,0.529099,0.65,False,score,25,27
+ntp-port,udp,123,0.3,120,ntp,True,HelloBarbie,3,10,0.30124,0.952336,0.561679,0.65,False,score,25,27
+ntp-port,udp,123,0.5,1,ntp,True,CanaryCamera,5,10,0.500717,0.4669,0.48719,0.65,False,score,26,27
+ntp-port,udp,123,0.5,30,ntp,True,HelloBarbie,5,10,0.500717,0.906422,0.662999,0.65,True,none (admitted),26,27
+ntp-port,udp,123,0.5,120,ntp,True,HelloBarbie,5,10,0.500717,0.969461,0.688215,0.65,True,none (admitted),26,27
+https-control,https,443,0.3,1,other,False,HelloBarbie,3,10,0.30124,0.432676,0.353815,0.65,False,eligibility-filter+score,25,27
+https-control,https,443,0.3,30,other,False,HelloBarbie,3,10,0.30124,0.870886,0.529099,0.65,False,eligibility-filter+score,25,27
+https-control,https,443,0.3,120,other,False,HelloBarbie,3,10,0.30124,0.952336,0.561679,0.65,False,eligibility-filter+score,25,27
+https-control,https,443,0.5,1,other,False,CanaryCamera,5,10,0.500717,0.4669,0.48719,0.65,False,eligibility-filter+score,26,27
+https-control,https,443,0.5,30,other,False,HelloBarbie,5,10,0.500717,0.906422,0.662999,0.65,False,eligibility-filter,26,27
+https-control,https,443,0.5,120,other,False,HelloBarbie,5,10,0.500717,0.969461,0.688215,0.65,False,eligibility-filter,26,27

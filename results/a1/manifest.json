@@ -1,0 +1,23 @@
+{
+  "commands": [],
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "gamma": 0,
+    "graph_enabled": false,
+    "theta": 0.65
+  },
+  "experiment": "a1_private_ip_exclusion_breakdown",
+  "inputs": {
+    "observations": "data/processed/observations_enriched.csv"
+  },
+  "metrics": {
+    "device_types": [
+      "NetatmoWeatherStation",
+      "BlipCareBPMeter"
+    ],
+    "note": "synthetic A1 disclosure; never aggregate with captured-A1 results"
+  },
+  "ram_budget_gib": 48,
+  "rss_reduce_threshold_gib": 12
+}

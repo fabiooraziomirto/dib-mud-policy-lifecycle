@@ -1,0 +1,11 @@
+train_deployment,test_deployment,method,device_count,admitted_candidates,precision_macro,recall_macro,f1_macro,device_coverage,portability_gate_exclusions,independent_training_sites
+US,UK,dib,26,0,0.0,0.0,0.0,0.0,493,1
+US,UK,pooled_union,26,3144,0.373203326201347,0.3471731158279504,0.34056970308350026,1.0,0,1
+US,UK,quorum_only,26,0,0.0,0.0,0.0,0.0,0,1
+US,UK,majority,26,3144,0.373203326201347,0.3471731158279504,0.34056970308350026,1.0,0,1
+US,UK,dib_without_portability_gate,26,0,0.0,0.0,0.0,0.0,0,1
+UK,US,dib,26,0,0.0,0.0,0.0,0.0,477,1
+UK,US,pooled_union,26,3638,0.3471731158279504,0.373203326201347,0.34056970308350026,1.0,0,1
+UK,US,quorum_only,26,0,0.0,0.0,0.0,0.0,0,1
+UK,US,majority,26,3638,0.3471731158279504,0.373203326201347,0.34056970308350026,1.0,0,1
+UK,US,dib_without_portability_gate,26,0,0.0,0.0,0.0,0.0,0,1

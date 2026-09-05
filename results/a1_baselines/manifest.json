@@ -1,0 +1,48 @@
+{
+  "experiment": "compromised_baseline_table1",
+  "config": {
+    "config_file": "configs/graph_free_selected.yaml",
+    "alpha": 0.6, "beta": 0.4, "gamma": 0.0, "theta": 0.65,
+    "rwv_threshold": 0.50
+  },
+  "commands": {
+    "main_sweep": [
+      "python3", "scripts/compromised_baseline.py",
+      "--config", "configs/ref_trust_hyperparams.yaml",
+      "--observations", "data/processed/observations_enriched.csv",
+      "--calibration-observations", "results/rwv_baseline/governance_bootstrap/calibration_observations.csv",
+      "--rwv-threshold", "0.50",
+      "--site-count", "10", "--partition-strategy", "random",
+      "--headline-k", "3",
+      "--output-dir", "outputs/tnsm_submission_2026/table1_compromised_baseline"
+    ],
+    "rwv_attempt2_federation_bootstrap": [
+      "python3", "scripts/compromised_baseline.py", "--config", "configs/ref_trust_hyperparams.yaml",
+      "--observations", "data/processed/observations_enriched.csv",
+      "--calibration-observations", "results/rwv_baseline/federation_bootstrap/calibration_observations.csv",
+      "--rwv-threshold", "0.50", "--site-count", "10", "--partition-strategy", "random", "--headline-k", "3",
+      "--strategies", "reputation_weighted_voting",
+      "--output-dir", "outputs/tnsm_submission_2026/table1_rwv_altcalib"
+    ],
+    "rwv_attempt3_raw_selfcalib": [
+      "python3", "scripts/compromised_baseline.py", "--config", "configs/ref_trust_hyperparams.yaml",
+      "--observations", "data/processed/observations_enriched.csv",
+      "--calibration-observations", "data/processed/observations_enriched.csv",
+      "--rwv-threshold", "0.50", "--site-count", "10", "--partition-strategy", "random", "--headline-k", "3",
+      "--strategies", "reputation_weighted_voting",
+      "--output-dir", "outputs/tnsm_submission_2026/table1_rwv_selfcalib"
+    ]
+  },
+  "metrics": {
+    "timings": {
+      "main_sweep": {"wall_seconds": 657.0, "peak_rss_gb": 1.972},
+      "rwv_attempt2": {"wall_seconds": 127.3, "peak_rss_gb": 1.827},
+      "rwv_attempt3": {"wall_seconds": null, "peak_rss_gb": null, "note": "timing non catturato separatamente, run breve (~2 min in linea con attempt2)"}
+    }
+  },
+  "exclude_non_global_ips": true,
+  "seed": 42,
+  "ram_budget_gib": 48,
+  "rss_reduce_threshold_gib": 12,
+  "note": "5/6 righe confermate esattamente col paper. RWV (13.22 qui vs 12.62 nel paper) spiegato e riprodotto altrove: vedi experiments/10_fig4_theta_sweep/ e README.md di questa cartella."
+}

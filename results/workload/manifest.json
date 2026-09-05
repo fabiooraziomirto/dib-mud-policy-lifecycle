@@ -1,0 +1,50 @@
+{
+  "command": [
+    "python3",
+    "scripts/moniotr_cross_lab.py",
+    "--observations",
+    "/root/Desktop/DIB/data/processed/moniotr_full_observations.csv",
+    "--output-dir",
+    "../experiments/17_moniotr_cross_lab"
+  ],
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "gamma": 0.0,
+    "min_reporting_sites": 2,
+    "theta": 0.65
+  },
+  "experiment": "moniotr_cross_lab_and_candidate_load",
+  "independent_deployments": [
+    "UK",
+    "US"
+  ],
+  "input": "/root/Desktop/DIB/data/processed/moniotr_full_observations.csv",
+  "input_sha256": "6d2f0080b6221b4ca696687e91e3225bc37e6e7665d4575947731c4897a1911b",
+  "interpretation": "cross-lab transfer; VPN trees are repeated observations, not independent sites",
+  "leave_one_out": {
+    "cold_start_requirement": "A two-source quorum requires at least three independent deployments: two sources and one receiver.",
+    "receiver_excluded_from": [
+      "reporters",
+      "eligible_population",
+      "breadth_denominator",
+      "temporal_days",
+      "temporal_counts"
+    ],
+    "result": "With only one independent source left after hold-out, the locked two-site quorum admits zero automatic candidates."
+  },
+  "rows_kept": 3484201,
+  "rows_read": 4166133,
+  "seed": 0,
+  "site_collapse": {
+    "moniotr-uk": "UK",
+    "moniotr-uk-vpn": "UK",
+    "moniotr-us": "US",
+    "moniotr-us-vpn": "US"
+  },
+  "workload_distribution": {
+    "device_scope": "device types present in both collapsed deployments",
+    "p95": "nearest rank",
+    "quartiles": "Tukey hinges"
+  }
+}

@@ -1,0 +1,33 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# LaTeX build products
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+!formal/logs/*.log
+!results/**/*.log
+*.out
+*.synctex.gz
+*.bbl
+*.blg
+*.toc
+
+# TLC state directories and binary traces (regenerable, hundreds of MB)
+states/
+*.st
+*.bin
+
+# SQLite runtime files
+*.db
+*.db-wal
+*.db-shm

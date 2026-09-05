@@ -1,0 +1,50 @@
+{
+  "commands": [],
+  "config": {
+    "aggregate_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "configs": {
+      "graph_augmented": "/root/Desktop/DIB_reframe/reproducibility/configs/graph_augmented.yaml",
+      "graph_free": "/root/Desktop/DIB_reframe/reproducibility/configs/graph_free_selected.yaml"
+    },
+    "exclude_non_global_ips": true,
+    "pipeline_order": "read_observations_csv -> filter_observations(exclude_non_global_ips=True) -> partition_observations",
+    "reference_seed": 42,
+    "variants": [
+      "full",
+      "no_site",
+      "no_temporal",
+      "no_graph"
+    ]
+  },
+  "experiment": "ablation_multiseed",
+  "inputs": {
+    "ground_truth": "data/unsw/profiles/normalized",
+    "observations": "data/processed/observations_enriched.csv"
+  },
+  "metrics": {
+    "completed_cells": 168
+  },
+  "ram_budget_gib": 48,
+  "rss_reduce_threshold_gib": 12
+}

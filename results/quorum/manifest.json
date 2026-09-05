@@ -1,0 +1,14 @@
+{
+  "experiment": "site_quorum_sensitivity",
+  "seed": 42,
+  "site_counts": [2, 3, 5, 10],
+  "quorums": [1, 2, 3, 5],
+  "partition_strategy": "random",
+  "scope": "UNSW pseudo-sites; not independent administrations",
+  "selected_config": "configs/graph_free_selected.yaml",
+  "selected_config_sha256": "feb0162a5baa4d172e5fdf5842dec0278a591cf9f8b348fc810f1eeabf6f0ce1",
+  "generator": "code/scripts/site_quorum_sensitivity.py",
+  "generator_sha256": "20efd427dd6802cbfca5affd7778308762ed28f3f7112f9e7c3d6b38ec19bb80",
+  "result": "results/site_quorum/site_quorum_sensitivity.csv",
+  "result_sha256": "667e09eab60a467d0c58607a9a60f32caa7b3d42a0df2071346bfbc7bb4b324e"
+}

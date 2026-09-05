@@ -1,0 +1,5 @@
+device_type,status,k,eligible_sites_after_filter,effective_f,malicious_admission_rate,review_burden,score,site_confidence,temporal_confidence,graph_confidence
+NetatmoWeatherStation,simulated_a1_not_aggregate,0,1,0.0,0,0.0,,,,
+NetatmoWeatherStation,simulated_a1_not_aggregate,1,1,1.0,1,0.0,0.733333,1.0,0.333333,0.0
+BlipCareBPMeter,simulated_a1_not_aggregate,0,1,0.0,0,0.0,,,,
+BlipCareBPMeter,simulated_a1_not_aggregate,1,1,1.0,0,0.0,0.64202,1.0,0.105051,0.0

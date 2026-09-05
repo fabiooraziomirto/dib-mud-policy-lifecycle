@@ -1,0 +1,37 @@
+services:
+  router:
+    build:
+      context: .
+      dockerfile: Dockerfile.router
+    privileged: true
+    network_mode: none
+    volumes:
+      - ${ARTIFACT_DIR}:/artifacts
+
+  device:
+    image: alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+    privileged: true
+    network_mode: none
+    command: ["sleep", "infinity"]
+
+  allowed-service:
+    image: python:3.12-alpine
+    privileged: true
+    network_mode: none
+    command: ["sleep", "infinity"]
+    volumes: ["./echo_service.py:/echo_service.py:ro"]
+
+  blocked-service:
+    image: python:3.12-alpine
+    privileged: true
+    network_mode: none
+    command: ["sleep", "infinity"]
+    volumes: ["./echo_service.py:/echo_service.py:ro"]
+
+  mud-server:
+    image: python:3.12-alpine
+    privileged: true
+    network_mode: none
+    command: ["sleep", "infinity"]
+    volumes:
+      - ${ARTIFACT_DIR}:/artifacts:ro

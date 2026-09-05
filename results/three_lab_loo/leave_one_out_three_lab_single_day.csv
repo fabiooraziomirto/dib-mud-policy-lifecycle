@@ -1,0 +1,4 @@
+receiving_deployment,source_deployments,independent_source_deployments,min_reporting_sites,target_device_types,admitted_candidates,target_device_coverage,precision_macro,recall_macro,f1_macro,metric_status,receiver_excluded_from_scoring
+US,UK+YT,2,2,0,0,0.0,0.0,0.0,0.0,not_applicable_no_admitted_candidates,True
+UK,US+YT,2,2,0,0,0.0,0.0,0.0,0.0,not_applicable_no_admitted_candidates,True
+YT,US+UK,2,2,0,0,0.0,0.0,0.0,0.0,not_applicable_no_admitted_candidates,True

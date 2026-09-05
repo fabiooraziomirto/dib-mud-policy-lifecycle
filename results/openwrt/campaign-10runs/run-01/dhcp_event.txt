@@ -1,0 +1,1 @@
+2026-08-08T12:00:00|NEW|OpenWRT.lan|DHCP|1,3,6,15|MUD|http://mud-server:8000/camera.json|-|02:42:ac:1e:00:02|172.30.0.2|camera|

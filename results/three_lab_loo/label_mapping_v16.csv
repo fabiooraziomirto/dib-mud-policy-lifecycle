@@ -1,0 +1,7 @@
+canonical,yourthings_label,moniotr_label,note
+philips-hue,philips-hue,philips-hue,exact match
+ring-doorbell,ring-doorbell,ring-doorbell,exact match
+smartthings,smartthings,smartthings,exact match
+insteon-hub,insteonhub,insteon-hub,hyphen-only normalization
+google-home-mini,googlehomemini,google-home-mini,hyphen-only normalization
+roku-tv,rokutv,roku-tv,hyphen-only normalization

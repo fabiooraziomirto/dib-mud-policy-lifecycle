@@ -1,0 +1,163 @@
+device_type,category,accepted_endpoint_count,device_accepted_endpoint_count
+AmazonEcho,RFC8520-exportable FQDN TCP/UDP,5,34
+AmazonEcho,private/local/reserved/link-local,3,34
+AmazonEcho,IP literal without observed FQDN,26,34
+AmazonEcho,protocol not exportable in current path,0,34
+AmazonEcho,missing direction/response evidence,0,34
+AmazonEcho,other/non-classified,0,34
+AugustDoorBell,RFC8520-exportable FQDN TCP/UDP,8,17
+AugustDoorBell,private/local/reserved/link-local,3,17
+AugustDoorBell,IP literal without observed FQDN,5,17
+AugustDoorBell,protocol not exportable in current path,1,17
+AugustDoorBell,missing direction/response evidence,0,17
+AugustDoorBell,other/non-classified,0,17
+AwairAirQuality,RFC8520-exportable FQDN TCP/UDP,0,12
+AwairAirQuality,private/local/reserved/link-local,2,12
+AwairAirQuality,IP literal without observed FQDN,10,12
+AwairAirQuality,protocol not exportable in current path,0,12
+AwairAirQuality,missing direction/response evidence,0,12
+AwairAirQuality,other/non-classified,0,12
+BelkinCamera,RFC8520-exportable FQDN TCP/UDP,2,8
+BelkinCamera,private/local/reserved/link-local,5,8
+BelkinCamera,IP literal without observed FQDN,1,8
+BelkinCamera,protocol not exportable in current path,0,8
+BelkinCamera,missing direction/response evidence,0,8
+BelkinCamera,other/non-classified,0,8
+BelkinWemoMotionSensor,RFC8520-exportable FQDN TCP/UDP,0,9
+BelkinWemoMotionSensor,private/local/reserved/link-local,6,9
+BelkinWemoMotionSensor,IP literal without observed FQDN,3,9
+BelkinWemoMotionSensor,protocol not exportable in current path,0,9
+BelkinWemoMotionSensor,missing direction/response evidence,0,9
+BelkinWemoMotionSensor,other/non-classified,0,9
+BelkinWemoSwitch,RFC8520-exportable FQDN TCP/UDP,0,8
+BelkinWemoSwitch,private/local/reserved/link-local,5,8
+BelkinWemoSwitch,IP literal without observed FQDN,3,8
+BelkinWemoSwitch,protocol not exportable in current path,0,8
+BelkinWemoSwitch,missing direction/response evidence,0,8
+BelkinWemoSwitch,other/non-classified,0,8
+BlipCareBPMeter,RFC8520-exportable FQDN TCP/UDP,0,1
+BlipCareBPMeter,private/local/reserved/link-local,1,1
+BlipCareBPMeter,IP literal without observed FQDN,0,1
+BlipCareBPMeter,protocol not exportable in current path,0,1
+BlipCareBPMeter,missing direction/response evidence,0,1
+BlipCareBPMeter,other/non-classified,0,1
+CanaryCamera,RFC8520-exportable FQDN TCP/UDP,5,7
+CanaryCamera,private/local/reserved/link-local,2,7
+CanaryCamera,IP literal without observed FQDN,0,7
+CanaryCamera,protocol not exportable in current path,0,7
+CanaryCamera,missing direction/response evidence,0,7
+CanaryCamera,other/non-classified,0,7
+HPPrinter,RFC8520-exportable FQDN TCP/UDP,0,8
+HPPrinter,private/local/reserved/link-local,5,8
+HPPrinter,IP literal without observed FQDN,3,8
+HPPrinter,protocol not exportable in current path,0,8
+HPPrinter,missing direction/response evidence,0,8
+HPPrinter,other/non-classified,0,8
+HelloBarbie,RFC8520-exportable FQDN TCP/UDP,2,2
+HelloBarbie,private/local/reserved/link-local,0,2
+HelloBarbie,IP literal without observed FQDN,0,2
+HelloBarbie,protocol not exportable in current path,0,2
+HelloBarbie,missing direction/response evidence,0,2
+HelloBarbie,other/non-classified,0,2
+LiFXBulb,RFC8520-exportable FQDN TCP/UDP,0,83
+LiFXBulb,private/local/reserved/link-local,3,83
+LiFXBulb,IP literal without observed FQDN,80,83
+LiFXBulb,protocol not exportable in current path,0,83
+LiFXBulb,missing direction/response evidence,0,83
+LiFXBulb,other/non-classified,0,83
+NestDropCam,RFC8520-exportable FQDN TCP/UDP,0,1
+NestDropCam,private/local/reserved/link-local,1,1
+NestDropCam,IP literal without observed FQDN,0,1
+NestDropCam,protocol not exportable in current path,0,1
+NestDropCam,missing direction/response evidence,0,1
+NestDropCam,other/non-classified,0,1
+NestProtect,RFC8520-exportable FQDN TCP/UDP,0,6
+NestProtect,private/local/reserved/link-local,1,6
+NestProtect,IP literal without observed FQDN,5,6
+NestProtect,protocol not exportable in current path,0,6
+NestProtect,missing direction/response evidence,0,6
+NestProtect,other/non-classified,0,6
+NetatmoWeatherStation,RFC8520-exportable FQDN TCP/UDP,0,1
+NetatmoWeatherStation,private/local/reserved/link-local,1,1
+NetatmoWeatherStation,IP literal without observed FQDN,0,1
+NetatmoWeatherStation,protocol not exportable in current path,0,1
+NetatmoWeatherStation,missing direction/response evidence,0,1
+NetatmoWeatherStation,other/non-classified,0,1
+NetatmoWelcome,RFC8520-exportable FQDN TCP/UDP,2,12
+NetatmoWelcome,private/local/reserved/link-local,1,12
+NetatmoWelcome,IP literal without observed FQDN,8,12
+NetatmoWelcome,protocol not exportable in current path,1,12
+NetatmoWelcome,missing direction/response evidence,0,12
+NetatmoWelcome,other/non-classified,0,12
+PhilipsHue,RFC8520-exportable FQDN TCP/UDP,6,23
+PhilipsHue,private/local/reserved/link-local,2,23
+PhilipsHue,IP literal without observed FQDN,15,23
+PhilipsHue,protocol not exportable in current path,0,23
+PhilipsHue,missing direction/response evidence,0,23
+PhilipsHue,other/non-classified,0,23
+PixStarPhotoFrame,RFC8520-exportable FQDN TCP/UDP,1,3
+PixStarPhotoFrame,private/local/reserved/link-local,2,3
+PixStarPhotoFrame,IP literal without observed FQDN,0,3
+PixStarPhotoFrame,protocol not exportable in current path,0,3
+PixStarPhotoFrame,missing direction/response evidence,0,3
+PixStarPhotoFrame,other/non-classified,0,3
+RingDoorBell,RFC8520-exportable FQDN TCP/UDP,1,2
+RingDoorBell,private/local/reserved/link-local,1,2
+RingDoorBell,IP literal without observed FQDN,0,2
+RingDoorBell,protocol not exportable in current path,0,2
+RingDoorBell,missing direction/response evidence,0,2
+RingDoorBell,other/non-classified,0,2
+SamsungCamera,RFC8520-exportable FQDN TCP/UDP,1,4
+SamsungCamera,private/local/reserved/link-local,3,4
+SamsungCamera,IP literal without observed FQDN,0,4
+SamsungCamera,protocol not exportable in current path,0,4
+SamsungCamera,missing direction/response evidence,0,4
+SamsungCamera,other/non-classified,0,4
+SamsungSmartThings,RFC8520-exportable FQDN TCP/UDP,0,32
+SamsungSmartThings,private/local/reserved/link-local,1,32
+SamsungSmartThings,IP literal without observed FQDN,31,32
+SamsungSmartThings,protocol not exportable in current path,0,32
+SamsungSmartThings,missing direction/response evidence,0,32
+SamsungSmartThings,other/non-classified,0,32
+TPLinkCamera,RFC8520-exportable FQDN TCP/UDP,1,10
+TPLinkCamera,private/local/reserved/link-local,1,10
+TPLinkCamera,IP literal without observed FQDN,8,10
+TPLinkCamera,protocol not exportable in current path,0,10
+TPLinkCamera,missing direction/response evidence,0,10
+TPLinkCamera,other/non-classified,0,10
+TPLinkSmartPlug,RFC8520-exportable FQDN TCP/UDP,0,9
+TPLinkSmartPlug,private/local/reserved/link-local,1,9
+TPLinkSmartPlug,IP literal without observed FQDN,8,9
+TPLinkSmartPlug,protocol not exportable in current path,0,9
+TPLinkSmartPlug,missing direction/response evidence,0,9
+TPLinkSmartPlug,other/non-classified,0,9
+TribySpeaker,RFC8520-exportable FQDN TCP/UDP,2,5
+TribySpeaker,private/local/reserved/link-local,1,5
+TribySpeaker,IP literal without observed FQDN,2,5
+TribySpeaker,protocol not exportable in current path,0,5
+TribySpeaker,missing direction/response evidence,0,5
+TribySpeaker,other/non-classified,0,5
+WithingsBabyMonitor,RFC8520-exportable FQDN TCP/UDP,1,3
+WithingsBabyMonitor,private/local/reserved/link-local,2,3
+WithingsBabyMonitor,IP literal without observed FQDN,0,3
+WithingsBabyMonitor,protocol not exportable in current path,0,3
+WithingsBabyMonitor,missing direction/response evidence,0,3
+WithingsBabyMonitor,other/non-classified,0,3
+WithingsSleepSensor,RFC8520-exportable FQDN TCP/UDP,1,3
+WithingsSleepSensor,private/local/reserved/link-local,2,3
+WithingsSleepSensor,IP literal without observed FQDN,0,3
+WithingsSleepSensor,protocol not exportable in current path,0,3
+WithingsSleepSensor,missing direction/response evidence,0,3
+WithingsSleepSensor,other/non-classified,0,3
+WithingsSmartScale,RFC8520-exportable FQDN TCP/UDP,1,2
+WithingsSmartScale,private/local/reserved/link-local,1,2
+WithingsSmartScale,IP literal without observed FQDN,0,2
+WithingsSmartScale,protocol not exportable in current path,0,2
+WithingsSmartScale,missing direction/response evidence,0,2
+WithingsSmartScale,other/non-classified,0,2
+iHome,RFC8520-exportable FQDN TCP/UDP,1,5
+iHome,private/local/reserved/link-local,1,5
+iHome,IP literal without observed FQDN,3,5
+iHome,protocol not exportable in current path,0,5
+iHome,missing direction/response evidence,0,5
+iHome,other/non-classified,0,5

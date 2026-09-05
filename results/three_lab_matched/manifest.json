@@ -1,0 +1,24 @@
+{
+  "command": "python code/scripts/v28_matched_ablation.py",
+  "scoring": "raw breadth",
+  "parameters": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "theta": 0.65,
+    "quorum": 2
+  },
+  "scope": "same six aligned device types for every stage; receiving site excluded from evidence",
+  "metrics": "macro per-device agreement with receiver-observed endpoints; not benignity",
+  "validations": [
+    "exact reproduction of three published receiver rows",
+    "nested candidate sets",
+    "receiver-deletion invariance of full DIB candidates"
+  ],
+  "sha256": {
+    "code/data/processed/moniotr_full_observations.csv": "6d2f0080b6221b4ca696687e91e3225bc37e6e7665d4575947731c4897a1911b",
+    "code/data/processed/yourthings_observations.csv": "b6db48840353f7a26c62ef53842a552561f1096a7fab1187ee1ebe44ae50ef8a",
+    "experiments/30_three_lab_loo/label_mapping_v16.csv": "ff16da1527f5bc99d5cf588842ea5f3391185963030bd529838b3a65fa8c89cb",
+    "code/scripts/v28_matched_ablation.py": "b486d1a5ac9be663f5988246bf38f57d9f6926d58e1677ff9dee5da605877c6d",
+    "code/scripts/moniotr_cross_lab.py": "b5fbab2daa450c685ee66e0b727d43eed37f3850d989fdb020bc17fd81a71d1c"
+  }
+}

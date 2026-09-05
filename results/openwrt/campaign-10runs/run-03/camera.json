@@ -1,0 +1,85 @@
+{
+  "ietf-access-control-list:access-lists": {
+    "acl": [
+      {
+        "aces": {
+          "ace": [
+            {
+              "actions": {
+                "forwarding": "accept"
+              },
+              "matches": {
+                "ipv4": {
+                  "ietf-acldns:dst-dnsname": "allowed.test",
+                  "protocol": 6
+                },
+                "tcp": {
+                  "destination-port-range-or-operator": {
+                    "operator": "eq",
+                    "port": 8080
+                  },
+                  "ietf-mud:direction-initiated": "from-device"
+                }
+              },
+              "rule-name": "dib-camera-fr-0"
+            },
+            {
+              "actions": {
+                "forwarding": "accept"
+              },
+              "matches": {
+                "ipv4": {
+                  "ietf-acldns:dst-dnsname": "allowed.test",
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port-range-or-operator": {
+                    "operator": "eq",
+                    "port": 5353
+                  },
+                  "ietf-mud:direction-initiated": "from-device"
+                }
+              },
+              "rule-name": "dib-camera-fr-1"
+            }
+          ]
+        },
+        "acl-type": "ipv4-acl-type",
+        "name": "dib-camera-fr"
+      },
+      {
+        "aces": {
+          "ace": []
+        },
+        "acl-type": "ipv4-acl-type",
+        "name": "dib-camera-to"
+      }
+    ]
+  },
+  "ietf-mud:mud": {
+    "cache-validity": 48,
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "dib-camera-fr"
+          }
+        ]
+      }
+    },
+    "is-supported": true,
+    "last-update": "2026-08-12T09:17:14.779855+00:00",
+    "mud-url": "http://mud-server:8000/camera.json",
+    "mud-version": 1,
+    "systeminfo": "DIB corroborated policy for camera",
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "dib-camera-to"
+          }
+        ]
+      }
+    }
+  }
+}

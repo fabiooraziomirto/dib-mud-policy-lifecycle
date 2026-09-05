@@ -1,0 +1,70 @@
+{
+  "command": [
+    "python3",
+    "scripts/moniotr_cross_lab.py",
+    "--observations",
+    "/root/Desktop/DIB/data/processed/moniotr_full_observations.csv",
+    "--output-dir",
+    "outputs/moniotr_cross_lab_v16_threelab"
+  ],
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "gamma": 0.0,
+    "min_reporting_sites": 2,
+    "theta": 0.65
+  },
+  "experiment": "moniotr_cross_lab_and_candidate_load",
+  "independent_deployments": [
+    "UK",
+    "US"
+  ],
+  "input": "/root/Desktop/DIB/data/processed/moniotr_full_observations.csv",
+  "input_sha256": "6d2f0080b6221b4ca696687e91e3225bc37e6e7665d4575947731c4897a1911b",
+  "interpretation": "cross-lab transfer; VPN trees are repeated observations, not independent sites",
+  "leave_one_out": {
+    "cold_start_requirement": "A two-source quorum requires at least three independent deployments: two sources and one receiver.",
+    "receiver_excluded_from": [
+      "reporters",
+      "eligible_population",
+      "breadth_denominator",
+      "temporal_days",
+      "temporal_counts"
+    ],
+    "result": "With only one independent source left after hold-out, the locked two-site quorum admits zero automatic candidates."
+  },
+  "leave_one_out_three_lab": {
+    "aligned_device_types": [
+      "google-home-mini",
+      "insteon-hub",
+      "philips-hue",
+      "ring-doorbell",
+      "roku-tv",
+      "smartthings"
+    ],
+    "label_mapping": "../data/label_mapping_v16.csv",
+    "label_mapping_sha256": "ff16da1527f5bc99d5cf588842ea5f3391185963030bd529838b3a65fa8c89cb",
+    "note": "Label mapping was frozen (Fase 6, plan step 2) before this experiment was run; it is a mechanical hyphen/case normalization plus three exact string matches, not a post-hoc fit to the result.",
+    "sites": [
+      "US",
+      "UK",
+      "YT"
+    ],
+    "yourthings_observations": "/root/Desktop/DIB/data/processed/yourthings_observations.csv",
+    "yourthings_observations_sha256": "b6db48840353f7a26c62ef53842a552561f1096a7fab1187ee1ebe44ae50ef8a"
+  },
+  "rows_kept": 3484201,
+  "rows_read": 4166133,
+  "seed": 0,
+  "site_collapse": {
+    "moniotr-uk": "UK",
+    "moniotr-uk-vpn": "UK",
+    "moniotr-us": "US",
+    "moniotr-us-vpn": "US"
+  },
+  "workload_distribution": {
+    "device_scope": "device types present in both collapsed deployments",
+    "p95": "nearest rank",
+    "quartiles": "Tukey hinges"
+  }
+}

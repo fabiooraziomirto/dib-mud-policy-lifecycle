@@ -1,0 +1,52 @@
+{
+  "commands": [],
+  "config": {
+    "config": "/root/Desktop/DIB_reframe/reproducibility/configs/graph_free_selected.yaml",
+    "exclude_non_global_ips": true,
+    "partition_strategy": "random",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "site_count": 10,
+    "windows": [
+      0,
+      30
+    ]
+  },
+  "experiment": "cold_start_local_vs_registry_multiseed",
+  "inputs": {
+    "ground_truth": "/root/Desktop/DIB/data/unsw/profiles/normalized",
+    "observations": "/root/Desktop/DIB/data/processed/observations_enriched.csv"
+  },
+  "metrics": {
+    "dib_day0_f1_mean": 0.111983,
+    "dib_day0_f1_std": 0.001856,
+    "dib_plus_30day_local_f1_mean": 0.114301,
+    "dib_plus_30day_local_f1_std": 0.001849,
+    "local_only_30day_f1_mean": 0.02177,
+    "local_only_30day_f1_std": 0.005082,
+    "ratio_mean": 5.462527,
+    "ratio_std": 1.543854
+  },
+  "ram_budget_gib": 48,
+  "rss_reduce_threshold_gib": 12
+}

@@ -1,0 +1,40 @@
+{
+  "checksums": {
+    "harness_sha256": "37a6ebe92ed376287533247e6b78a5ac01b48833366168e29c2212504a44ffe0",
+    "invariants_csv_sha256": "16321c56e798cbb4228937ff079af76dc0436f977b1560e0f337997c9e98795a",
+    "services_sha256": "bea8a575479e7866438e8248b59b7022c1a475540fa164dee0f838cda12f47be",
+    "throughput_csv_sha256": null
+  },
+  "command": [
+    "code/scripts/fsm_concurrency_harness.py",
+    "--skip-throughput",
+    "--invariant-trials",
+    "200",
+    "--output-dir",
+    "../experiments/35_v28_concurrency",
+    "--label",
+    "v28_correctness"
+  ],
+  "config": {
+    "database": "fresh SQLite database per run",
+    "invariant_trials": 200,
+    "ops_per_worker": 20,
+    "optimistic_retry_limit": 10,
+    "repeats": 3,
+    "retry_exhaustion_trials": 25,
+    "retry_exhaustion_writers": 25,
+    "skip_invariants": false,
+    "skip_throughput": true,
+    "warmup_ops_per_worker": 20,
+    "worker_counts": "1,10,50,100"
+  },
+  "experiment": "fsm_concurrency_harness",
+  "hardware": {
+    "cpu_count": 16,
+    "platform": "Linux-6.8.12-18-pve-x86_64-with-glibc2.35",
+    "processor": "x86_64",
+    "python_implementation": "CPython",
+    "python_version": "3.10.13"
+  },
+  "label": "v28_correctness"
+}

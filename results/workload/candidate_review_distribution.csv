@@ -1,0 +1,3 @@
+site_id,method,device_scope,device_count,queue_total,mean,median,q1,q3,p95_nearest_rank,maximum
+US,dib,overlapping,26,462,17.76923076923077,8.5,0.0,30.0,57,80
+UK,dib,overlapping,26,462,17.76923076923077,8.5,0.0,30.0,57,80

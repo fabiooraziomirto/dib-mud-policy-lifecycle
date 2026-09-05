@@ -1,0 +1,217 @@
+{
+  "paper_version": "v31.1",
+  "paper_source": "paper/main.tex",
+  "selected_configuration": "configs/graph_free_selected.yaml",
+  "seed_policy": "Seeded aggregates use seeds 0-19; A1, Sybil and drift use seed 42; cross-lab, OpenWrt and concurrency use seed 0.",
+  "note": "Every 'result' path is relative to the repository root. 'generator' names the script that produced it; scripts requiring licensed traces cannot be re-run from this repository alone (see README, 'Data and licensing').",
+  "claims": [
+    {
+      "id": "tla_base_states",
+      "section": "RQ1",
+      "value": "3,837,084 reachable states satisfy I1-I3 and export eligibility",
+      "result": "formal/logs/full_lifecycle.log",
+      "generator": "formal/base/run_tlc.sh",
+      "input": "none (finite model, 3 sites x 2 facts)"
+    },
+    {
+      "id": "tla_mutations",
+      "section": "RQ1",
+      "value": "six guard-removal mutations each produce a counterexample",
+      "result": "formal/logs/mutation_m1_restore_recreates_grant.log, formal/logs/mutation_m2_commit_escapes_site.log, formal/logs/mutation_m3_export_while_disputed.log, formal/logs/mutation_m4_local_restore_ignores_dispute.log, formal/logs/mutation_m5_local_revoke_escapes_site.log, formal/logs/mutation_m6_global_restore_clears_local_revoke.log",
+      "generator": "formal/base/run_tlc.sh",
+      "input": "none"
+    },
+    {
+      "id": "tla_no_commit_states",
+      "section": "RQ1",
+      "value": "removing operator-commit leaves 1,749,604 reachable states, none Active",
+      "result": "formal/logs/evidence_only.log",
+      "generator": "formal/base/run_tlc.sh (DIBEvidenceOnly.cfg)",
+      "input": "none"
+    },
+    {
+      "id": "tla_distributed_extension",
+      "section": "RQ1",
+      "value": "718,571 states generated, 44,610 distinct, depth 18, no counterexample",
+      "result": "formal/logs/distributed_extension.log",
+      "generator": "java -cp tla2tools.jar tlc2.TLC -config DIB_Distributed.cfg DIB_Distributed.tla (formal/distributed/)",
+      "input": "none"
+    },
+    {
+      "id": "registry_regression",
+      "section": "RQ1",
+      "value": "global restore erased the local veto before the fix; 33 registry tests pass after it",
+      "result": "formal/logs/regression_before.log, formal/logs/regression_after.log, formal/logs/registry_trace.json",
+      "generator": "python -m pytest code/tests/tests/test_registry.py",
+      "input": "none"
+    },
+    {
+      "id": "openwrt_campaign",
+      "section": "RQ1",
+      "value": "10/10 runs complete; MonitorOnly exports no rule, commit permits TCP/8080 and UDP/5353, dispute removes the nftables rules and the probe is refused",
+      "result": "results/openwrt/campaign-10runs/campaign_summary.json",
+      "generator": "openwrt/run_campaign.py --runs 10",
+      "input": "Docker images declared in openwrt/docker-compose.yml"
+    },
+    {
+      "id": "openwrt_distributed_driven",
+      "section": "RQ1",
+      "value": "the same gateway driven through the distributed deployment reproduces every transition",
+      "result": "results/openwrt/single-run-distributed-driven/",
+      "generator": "openwrt/run_distributed.sh",
+      "input": "Docker images declared in openwrt/docker-compose.yml"
+    },
+    {
+      "id": "observable_retention",
+      "section": "RQ2",
+      "value": "63.2% of observable macro behavior retained; 7.9% complete-profile macro recall; 55 of 564 reference ACEs observable, 36 staged",
+      "result": "results/recall/recall_funnel.csv",
+      "generator": "code/scripts/recall_funnel.py",
+      "input": "licensed UNSW-IoTraffic observations and MUD reference profiles"
+    },
+    {
+      "id": "graph_free_ablation",
+      "section": "RQ2",
+      "value": "344.55 +/- 5.03 accepted facts, macro agreement F1 0.104 +/- 0.001 over 20 seeds",
+      "result": "results/ablation_multiseed/summary.csv",
+      "generator": "code/scripts/strict_graphfree_suite.py",
+      "input": "licensed UNSW-IoTraffic observations"
+    },
+    {
+      "id": "cold_start_vs_local_only",
+      "section": "RQ2",
+      "value": "local-only 30-day macro F1 0.022 +/- 0.005; DIB day-0 0.112 +/- 0.002; DIB + 30 days local 0.114 +/- 0.002",
+      "result": "results/cold_start/cold_start_local_vs_registry_detail.csv",
+      "generator": "code/scripts/cold_start_local_vs_registry_multiseed.py",
+      "input": "licensed UNSW-IoTraffic observations and MUD reference profiles"
+    },
+    {
+      "id": "two_lab_workload",
+      "section": "RQ2",
+      "value": "quorum 840, +score 697, +class gate 462 candidates (452 serializable); union 24,121 (US) and 6,707 (UK); 98.1% and 93.1% reduction; 15.9 additions per site-day, peak 432",
+      "result": "results/workload/candidate_review_load.csv, results/workload/candidate_review_load_by_window.csv",
+      "generator": "code/scripts/moniotr_cross_lab.py",
+      "input": "Mon(IoT)r traces obtained separately under their terms"
+    },
+    {
+      "id": "three_lab_matched_ablation",
+      "section": "RQ2",
+      "value": "matched cold-start ablation over three deployments and six aligned device types; DIB reduces candidates by 96.4% (US), 94.4% (UK), 92.3% (YT)",
+      "result": "results/three_lab_matched/matched_ablation.csv, results/three_lab_matched/per_device.csv",
+      "generator": "code/scripts/v28_matched_ablation.py",
+      "input": "Mon(IoT)r and YourThings traces obtained separately under their terms"
+    },
+    {
+      "id": "three_lab_bootstrap",
+      "section": "RQ2",
+      "value": "full-DIB bootstrap 95% F1 intervals [0.033,0.198] US, [0.044,0.186] UK, [0.116,0.384] YT; busiest-single-day F1 0.241/0.213/0.258",
+      "result": "results/three_lab_loo/bootstrap_ci.csv, results/three_lab_loo/leave_one_out_three_lab_single_day.csv",
+      "generator": "code/scripts/moniotr_cross_lab.py",
+      "input": "Mon(IoT)r and YourThings traces obtained separately under their terms"
+    },
+    {
+      "id": "us_uk_overlap",
+      "section": "RQ2",
+      "value": "26 shared device types, mean endpoint-fact overlap 0.25, three types sharing no facts",
+      "result": "results/overlap_profile.csv",
+      "generator": "code/scripts/real_federation_intent_overlap.py",
+      "input": "Mon(IoT)r traces obtained separately under their terms"
+    },
+    {
+      "id": "a1_captured_attacks",
+      "section": "RQ3",
+      "value": "59 facts from 165 captured A1 observations; DIB stages none; pooled union and frequency filtering stage all",
+      "result": "results/a1/a1_excluded_devices.csv, results/a1_baselines/compromised_baseline_table.csv",
+      "generator": "code/scripts/compromised_baseline.py",
+      "input": "licensed UNSW attack annotations"
+    },
+    {
+      "id": "port_masquerading",
+      "section": "RQ3",
+      "value": "largest quorum-clearing score 0.562 at f_s=0.30 over 120 days (rejected); 0.663 at f_s=0.50 over 30 days (staged MonitorOnly); one-day agreement at 0.354",
+      "result": "results/masquerade/service_masquerade.csv",
+      "generator": "code/scripts/service_masquerade_probe.py",
+      "input": "licensed UNSW-IoTraffic observations"
+    },
+    {
+      "id": "parameter_sensitivity",
+      "section": "RQ3",
+      "value": "at the selected operating point Mon(IoT)r F1 is 0.054 against a corpus-best 0.071; the external-bound choice costs 0.017 F1",
+      "result": "results/sensitivity/moniotr_theta_sweep.csv, results/sensitivity/moniotr_alpha_sweep.csv, results/sensitivity/yourthings_theta_sweep.csv, results/sensitivity/yourthings_alpha_sweep.csv",
+      "generator": "code/scripts/parameter_sensitivity_external.py",
+      "input": "Mon(IoT)r and YourThings traces obtained separately under their terms"
+    },
+    {
+      "id": "quorum_sensitivity",
+      "section": "RQ3",
+      "value": "at N=10, quorums m=1,2,3,5 each stage 346 facts and retain 63.17% of the observable macro ceiling",
+      "result": "results/quorum/site_quorum_sensitivity_rerun.csv",
+      "generator": "code/scripts/site_quorum_sensitivity.py",
+      "input": "licensed UNSW-IoTraffic observations and MUD reference profiles"
+    },
+    {
+      "id": "sybil_identity_inflation",
+      "section": "RQ3",
+      "value": "raw counting stages the fabrication in 45/48 representative cells; trust weighting and clustering reject it; RWV admits all 48",
+      "result": "results/sybil/sybil_sensitivity_surface.csv",
+      "generator": "code/scripts/sybil_sensitivity_surface.py",
+      "input": "licensed UNSW-IoTraffic observations"
+    },
+    {
+      "id": "sybil_padding_jaccard",
+      "section": "RQ3",
+      "value": "padding real endpoints defeats clustering at the extreme cell (score 0.905); no Jaccard threshold in [0.6,0.95] withstands every padding level",
+      "result": "results/sybil_jaccard/sybil_padding_sweep.csv, results/sybil_padding/",
+      "generator": "code/scripts/sybil_padding_sweep.py",
+      "input": "licensed UNSW-IoTraffic observations"
+    },
+    {
+      "id": "drift_indistinguishability",
+      "section": "RQ3",
+      "value": "legitimate rollout and slow compromise produce identical scores; 69 of 162 device-type/adoption cases admit within the horizon, median 7 days",
+      "result": "results/drift/nonstationarity_time_to_admission_summary.csv, results/drift/nonstationarity_rollout.csv",
+      "generator": "code/scripts/nonstationarity_drift_sweep.py",
+      "input": "licensed UNSW-IoTraffic observations"
+    },
+    {
+      "id": "single_node_concurrency",
+      "section": "Scalability",
+      "value": "317.5 +/- 10.8 ops/s at 100 writers, median latency 3.8 +/- 0.2 ms, p99 from 5.3 +/- 0.4 ms to 5895.5 +/- 191.4 ms; 9,660 timed operations, no unexpected errors",
+      "result": "results/concurrency/throughput_v28_performance.csv",
+      "generator": "code/scripts/fsm_concurrency_harness.py",
+      "input": "none"
+    },
+    {
+      "id": "concurrency_invariants",
+      "section": "Scalability",
+      "value": "1,825 trials across ten scenarios, zero violations",
+      "result": "results/concurrency/invariants_v28_correctness.csv",
+      "generator": "code/scripts/fsm_concurrency_harness.py",
+      "input": "none"
+    },
+    {
+      "id": "distributed_throughput",
+      "section": "Scalability",
+      "value": "530.3 +/- 7.8 ops/s and p99 454.8 +/- 9.1 ms at 100 writers; median latency 9.5/35.9/90.7/168.7 ms at 1/10/50/100 writers",
+      "result": "results/distributed/throughput_distributed_5rep.csv",
+      "generator": "code/scripts/distributed_concurrency_benchmark.py",
+      "input": "none"
+    },
+    {
+      "id": "fault_injection_reconciliation",
+      "section": "Scalability",
+      "value": "40 trials across four outage scenarios all converge; 0.51 +/- 0.03 s over the three single-event scenarios and 0.50 +/- 0.04 s for the compound outage",
+      "result": "results/fault_injection/results.csv, results/fault_injection/trials.csv",
+      "generator": "code/scripts/fault_injection_experiment.py",
+      "input": "none"
+    },
+    {
+      "id": "architectural_ablation",
+      "section": "Scalability",
+      "value": "sharded threads p99 78.1 ms vs 83.7 ms unsharded at 100 workers; SQLite ATTACH p99 30.0 s vs 78.7 ms unsharded at 10 workers",
+      "result": "results/architecture/throughput_sharded.csv, results/architecture/throughput_sharded_mp.csv",
+      "generator": "code/scripts/sharded_concurrency_benchmark_mp.py",
+      "input": "none"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+source_deployment,receiving_deployment,independent_source_deployments,min_reporting_sites,target_device_types,admitted_candidates,target_device_coverage,precision_macro,recall_macro,f1_macro,metric_status,receiver_excluded_from_scoring,interpretation
+US,UK,1,2,26,0,0.0,0.0,0.0,0.0,not_applicable_no_admitted_candidates,True,one source remains after hold-out; m=2 cannot admit an automatic candidate
+UK,US,1,2,26,0,0.0,0.0,0.0,0.0,not_applicable_no_admitted_candidates,True,one source remains after hold-out; m=2 cannot admit an automatic candidate

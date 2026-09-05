@@ -1,0 +1,46 @@
+{
+  "ietf-access-control-list:access-lists": {
+    "acl": [
+      {
+        "aces": {
+          "ace": []
+        },
+        "acl-type": "ipv4-acl-type",
+        "name": "dib-camera-fr"
+      },
+      {
+        "aces": {
+          "ace": []
+        },
+        "acl-type": "ipv4-acl-type",
+        "name": "dib-camera-to"
+      }
+    ]
+  },
+  "ietf-mud:mud": {
+    "cache-validity": 48,
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "dib-camera-fr"
+          }
+        ]
+      }
+    },
+    "is-supported": true,
+    "last-update": "2026-09-03T12:24:51.103856+00:00",
+    "mud-url": "http://mud-server:8000/camera.json",
+    "mud-version": 1,
+    "systeminfo": "DIB corroborated policy for camera",
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "dib-camera-to"
+          }
+        ]
+      }
+    }
+  }
+}

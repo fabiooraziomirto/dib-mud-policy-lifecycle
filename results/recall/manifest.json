@@ -1,0 +1,39 @@
+{
+  "commands": [
+    [
+      "python3",
+      "scripts/recall_funnel.py"
+    ]
+  ],
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "exclude_non_global_ips": true,
+    "gamma": 0.0,
+    "min_reporting_sites": 2,
+    "pipeline_order": "read_observations_csv -> filter_observations -> partition_observations -> DIBScorer.score",
+    "scoring_config_file": "../configs/graph_free_selected.yaml",
+    "seed": 42,
+    "site_count": 10,
+    "theta": 0.65,
+    "trust_weighted": true
+  },
+  "experiment": "recall_funnel",
+  "inputs": {
+    "ground_truth": "data/unsw/profiles/normalized",
+    "input_sha256": "e741b42656e81a1b128d0ecf9cfd6a85cc6dba39629cc22025a1bbef5fd61512",
+    "observations": "data/processed/observations_enriched.csv"
+  },
+  "metrics": {
+    "accepted_facts": 346,
+    "peak_rss_gib": 1.736,
+    "reference_class_breakdown": {
+      "dns": 37,
+      "ntp": 38,
+      "other": 5,
+      "update": 8,
+      "vendor-cloud": 476
+    },
+    "wall_seconds": 89.5
+  }
+}

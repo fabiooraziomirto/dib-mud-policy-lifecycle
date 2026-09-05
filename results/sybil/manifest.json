@@ -1,0 +1,46 @@
+{
+  "experiment": "sybil_sensitivity_surface_selected_config",
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "gamma": 0.0,
+    "theta": 0.65,
+    "trust_weighted": true,
+    "config_file": "configs/graph_free_selected.yaml"
+  },
+  "commands": [
+    [
+      "python3",
+      "scripts/sybil_sensitivity_surface.py",
+      "--config",
+      "configs/ref_trust_hyperparams.yaml",
+      "--observations",
+      "data/processed/observations_enriched.csv",
+      "--calibration-observations",
+      "/root/Desktop/DIB_reframe/results/rwv_baseline/governance_bootstrap/calibration_observations.csv",
+      "--output-dir",
+      "outputs/tnsm_submission_2026/sybil_selected"
+    ]
+  ],
+  "inputs": {
+    "observations": "data/processed/observations_enriched.csv",
+    "calibration_observations": "results/rwv_baseline/governance_bootstrap/calibration_observations.csv (68MB derivato, non incluso qui, rigenerabile con scripts/prepare_rwv_governance_bootstrap.py --seed 4201)"
+  },
+  "metrics": {
+    "timings": {
+      "sybil": {
+        "wall_seconds": 846.2,
+        "peak_rss_gb": 3.506
+      }
+    },
+    "cells": 48,
+    "observations_after_filter_and_partition": 1268020,
+    "exclude_non_global_ips": true,
+    "site_count": 10,
+    "partition_strategy": "random",
+    "seed": 42
+  },
+  "ram_budget_gib": 48,
+  "rss_reduce_threshold_gib": 12,
+  "note": "Prima esecuzione in assoluto: script gia' presente nel repository (identico a quello usato in experiments/04_strict_alternative_config/ per la config strict) ma mai lanciato con configs/graph_free_selected.yaml. Eseguito con il fix di CHANGELOG.md voce 6 gia' applicato (exclude_non_global_ips=True di default)."
+}

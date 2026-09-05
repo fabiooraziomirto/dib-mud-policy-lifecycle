@@ -1,0 +1,9 @@
+strategy,k,device_types_covered,mean_malicious_admission_rate,mean_benign_exceptions_per_site,mean_benign_f1
+local_only,3,5,0.3,0.0,0.05426
+pooled_union,3,5,1.0,0.0,0.047277
+majority_registry,3,5,0.0,11.72,0.056668
+frequency_filtered_registry,3,5,1.0,4.94,0.049074
+reputation_weighted_voting,3,5,0.0,13.22,0.05751
+dib_vanilla,3,5,0.0,35.52,0.033333
+dib_trust_weighted,3,5,0.0,35.52,0.033333
+dib_independence_aware,3,5,0.0,35.52,0.033333

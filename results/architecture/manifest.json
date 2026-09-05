@@ -1,0 +1,13 @@
+{
+  "experiment": "sharded_concurrency_benchmark",
+  "n_sites": 1,
+  "config": {
+    "output_dir": "outputs/sharded_realistic_1site",
+    "worker_counts": "100",
+    "ops_per_worker": 20,
+    "warmup_ops": 20,
+    "repeats": 3,
+    "n_sites": 1,
+    "mix": "realistic"
+  }
+}

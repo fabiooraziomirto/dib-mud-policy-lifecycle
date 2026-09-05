@@ -1,0 +1,12 @@
+{
+  "experiment": "openwrt_osmud_end_to_end",
+  "command": ["./run.sh"],
+  "seed": 0,
+  "config": {"site_id": "lab-a", "device_type": "camera", "tcp_port": 8080, "udp_port": 5353},
+  "dispute_sequence": ["dispute1 (lab-b, Active->Disputed)", "dispute2 (lab-c, Disputed->Revoked)"],
+  "probes_per_phase": ["01 monitor", "02 commit", "03a first dispute", "03b second dispute", "04 restore", "05 recommit"],
+  "openwrt": "23.05.5@sha256:a44cce5d8f3619e30b0b7cf74e236d4e62cb3bf118953f57e044dc684d7cfc36",
+  "osmud_commit": "852918eb33f3e15225da4de21d440b5b9a5d875f",
+  "checksums": "checksums.sha256",
+  "result": "result.json"
+}
