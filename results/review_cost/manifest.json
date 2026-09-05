@@ -1,0 +1,28 @@
+{
+  "caveats": [
+    "Review burden is measured in queue entries, not operator time; no user study is performed.",
+    "The fixed-budget row for union assumes arbitrary review order; union defines no ranking. Any ranking an operator applies is itself an admission filter.",
+    "Six aligned device types only (label_mapping_v16.csv); same scope as Table tab:threelab."
+  ],
+  "command": "python3 code/scripts/review_cost_curve.py",
+  "definitions": {
+    "confirmed": "candidates matching a receiver-observed endpoint (per_device.csv 'matched'); traffic agreement, not benignity",
+    "expected_confirmed_at_budget": "yield when only 'budget' entries can be reviewed, assuming uniformly random review order within an unranked queue",
+    "extra_reviews_per_extra_confirmed": "(N_stage-N_DIB)/(M_stage-M_DIB): marginal review cost of each additional confirmed endpoint a weaker filter recovers",
+    "micro_precision": "sum(matched)/sum(candidates) over the six aligned device types",
+    "reviews_per_confirmed": "sum(candidates)/sum(matched): queue entries an operator inspects per confirmed endpoint"
+  },
+  "derivation": "aggregation only; no re-run of the admission pipeline",
+  "experiment": "review_cost_of_candidate_queues",
+  "parameters": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "quorum": 2,
+    "theta": 0.65
+  },
+  "sha256": {
+    "code/scripts/review_cost_curve.py": "0d892586a7f6a62abd463448c9324da5d171ce22b4edc712ef30b5595d396ae8",
+    "experiments/33_v28_matched_ablation/per_device.csv": "1446beff62b34ade5fd1309036a309b6a4cdd8f59af698018862b720cf3eb1d0"
+  },
+  "source_experiment": "experiments/33_v28_matched_ablation"
+}

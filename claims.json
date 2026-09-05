@@ -1,5 +1,5 @@
 {
-  "paper_version": "v31.1",
+  "paper_version": "v32.0",
   "paper_source": "paper/main.tex",
   "selected_configuration": "configs/graph_free_selected.yaml",
   "seed_policy": "Seeded aggregates use seeds 0-19; A1, Sybil and drift use seed 42; cross-lab, OpenWrt and concurrency use seed 0.",
@@ -212,6 +212,14 @@
       "result": "results/architecture/throughput_sharded.csv, results/architecture/throughput_sharded_mp.csv",
       "generator": "code/scripts/sharded_concurrency_benchmark_mp.py",
       "input": "none"
+    },
+    {
+      "id": "review_cost",
+      "section": "RQ2",
+      "value": "union costs 5.46 (US), 4.31 (UK), 28.31 (YT) inspected entries per confirmed endpoint against 1.03, 1.16, 2.89 under full DIB; at a budget equal to the full-DIB queue, DIB confirms 3.7-9.8x more endpoints than union",
+      "result": "results/review_cost/review_cost.csv, results/review_cost/fixed_budget.csv, results/review_cost/marginal_cost.csv",
+      "generator": "code/scripts/review_cost_curve.py",
+      "input": "derived from results/three_lab_matched/per_device.csv; no licensed trace needed"
     }
   ]
 }

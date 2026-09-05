@@ -1,0 +1,10 @@
+receiver,stage,baseline,extra_candidates,extra_confirmed,extra_reviews_per_extra_confirmed
+US,union,DIB,969,149,6.503
+US,quorum,DIB,6,6,1.0
+US,quorum_score,DIB,4,4,1.0
+UK,union,DIB,724,141,5.135
+UK,quorum,DIB,5,4,1.25
+UK,quorum_score,DIB,5,4,1.25
+YT,union,DIB,1280,12,106.667
+YT,quorum,DIB,70,4,17.5
+YT,quorum_score,DIB,39,4,9.75

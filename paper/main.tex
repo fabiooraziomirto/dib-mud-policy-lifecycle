@@ -29,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-Shared IoT traffic observations can support Manufacturer Usage Description (MUD) policy drafting across independent administrative domains, but provide evidence, not local authority. Device Intent Blueprint (DIB) separates shared evidence from per-site authorization through explicit approval, dispute, revocation, and restoration semantics. Only local operators authorize export; disputes invalidate authorization, and restoration requires renewed approval while preserving local revocations. A finite TLA+ model checks these properties across 3,837,084 reachable states; mutation controls expose restoration and site-confinement failures, and registry regression testing identified and corrected a revocation-handling mismatch. An OpenWrt/osMUD testbed validates policy application on a reachable gateway. A single-host, ten-site distributed deployment reconciles disconnected sites in 0.51~s; an extended finite model checks safety only among reachable, reconciled sites. A matched cold-start comparison across three deployments and six device types reduces candidate counts by 92.3--96.4\% relative to pooled observations, increasing traffic-agreement precision but lowering recall. Quorum drives most of the reduction; additional filters have receiver-dependent costs. A separate reference-profile evaluation retains 63.2\% of observable macro behavior with 7.9\% complete-profile recall. DIB manages partial policy proposals under authenticated-consortium assumptions; it neither establishes benignity nor guarantees immediate withdrawal at unreachable gateways.
+Shared IoT traffic observations can support Manufacturer Usage Description (MUD) policy drafting across independent administrative domains, but provide evidence, not local authority. Device Intent Blueprint (DIB) separates shared evidence from per-site authorization through explicit approval, dispute, revocation, and restoration semantics. Only local operators authorize export; disputes invalidate authorization, and restoration requires renewed approval while preserving local revocations. A finite TLA+ model checks these properties across 3,837,084 reachable states; mutation controls expose restoration and site-confinement failures, and registry regression testing identified and corrected a revocation-handling mismatch. An OpenWrt/osMUD testbed validates policy application on a reachable gateway. A single-host, ten-site distributed deployment reconciles disconnected sites in 0.51~s; an extended finite model checks safety only among reachable, reconciled sites. A matched cold-start comparison across three deployments and six device types reduces candidate counts by 92.3--96.4\% relative to pooled observations, cutting review cost from 4.3--28.3 to 1.03--2.89 inspected candidates per confirmed endpoint while lowering recall. Quorum drives most of the reduction; additional filters have receiver-dependent costs. A separate reference-profile evaluation retains 63.2\% of observable macro behavior with 7.9\% complete-profile recall. DIB manages partial policy proposals under authenticated-consortium assumptions; it neither establishes benignity nor guarantees immediate withdrawal at unreachable gateways.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -61,11 +61,11 @@ RFC~8520 leaves MUD profile authoring and management to administrators~\cite{rfc
 
 Threat-intelligence sharing (MISP, STIX), contributor reputation~\cite{wagner2016misp,stix21,eigentrust,trustsurvey}, and collaborative IoT learning (CoLearn, D\"IoT, IoT Inspector)~\cite{colearn,ndiot2019,iotinspector,vasilomanolakis2015collaborative} provide related mechanisms for aggregating evidence, traffic models, or anomaly reports. Evidence quality alone does not authorize network reachability.
 
-Cross-domain policy frameworks address distributed authoring, provenance, or consistency~\cite{pbnm,rfc9315,matheu2019mudtesting,blockchainmud,fidem,liuzerotrust2024,sun2025sanitizable,polaris,alshaer2004firewall,chowdhary2022intent,pipeconf2022,vergutz2023data}. DIB focuses on how shared disputes and restoration interact with independent local decisions. Table~\ref{tab:comparison} compares explicit workflow semantics, not presumed deficiencies of prior systems: other provenance-aware workflows can also preserve local control. DIB contributes their composition for shared MUD proposals, finite-state verification, and executable withdrawal and re-approval.
+Cross-domain policy frameworks address distributed authoring, provenance, or consistency~\cite{pbnm,rfc9315,matheu2019mudtesting,blockchainmud,fidem,liuzerotrust2024,sun2025sanitizable,polaris,alshaer2004firewall,chowdhary2022intent,pipeconf2022,vergutz2023data}. DIB focuses on how shared disputes and restoration interact with independent local decisions. No published system combines MUD policy objects, evidence contributed across administrative domains, and a per-site authorization record with dispute-driven withdrawal and restoration. MUD work operates inside one domain~\cite{clearasmud,hamzatdsc,mudflow,CornoMannella2023GatewayMUD,osmud,mudscope}; cross-domain access-control frameworks operate on identity and policy objects carrying no notion of contributed traffic evidence~\cite{polaris,liuzerotrust2024,sun2025sanitizable}; evidence-sharing platforms distribute indicators without a local authorization record to invalidate~\cite{wagner2016misp,stix21,colearn,ndiot2019}; and blockchain-backed MUD distribution~\cite{blockchainmud} makes profiles tamper-evident without separating shared evidence from site-local authority. The available reference points are therefore the two ends of the design space DIB sits between: pooled union, which stages every shared observation, and reputation-weighted voting, which weights contributors but still yields one shared verdict. We evaluate against both (Sec.~\ref{sec:impl}). Table~\ref{tab:comparison} accordingly compares defined workflow semantics: the alternatives are the restoration rules a system can implement, not deficiencies of any particular prior system. DIB contributes their composition for shared MUD proposals, finite-state verification, and executable withdrawal and re-approval.
 
 \begin{table}[t]
 \centering
-\caption{Defined workflow alternatives for one fact, initially approved at site $s$. The sequence is local revoke at $s$, peer dispute, then global restore. These are semantic comparisons, not measured implementations of prior systems.}
+\caption{Defined workflow alternatives for one fact, initially approved at site $s$. The sequence is local revoke at $s$, peer dispute, then global restore.}
 \label{tab:comparison}
 \scriptsize
 \begin{tabular}{@{}p{2.1cm}p{2.3cm}p{2.65cm}@{}}
@@ -263,9 +263,9 @@ Registry queries block disputed/revoked facts; \textsc{operator-commit} remains 
 
 We select weights from an external adversarial-breadth bound and threshold, then measure utility: raw-breadth parameters are $(\alpha,\beta)=(0.6,0.4)$, $\theta=0.65$, and $m=2$. Sec.~\ref{sec:sensitivity-results} reports the empirical cost.
 
-\textbf{Conditional bound.} Rejection of adversary-only evidence depends on an externally governed malicious-contributor breadth bound, even at maximal temporal confidence. It is not a general poisoning or Sybil-resistance guarantee.
+\textbf{Parameter selection.} The weights are not tuned on the corpus. We fix them from the external breadth bound, so admission arithmetic decides $\alpha$ before any dataset is seen.
 
-\begin{criterion}[Conditional admission bound]
+\begin{criterion}[Admission design constraint]
 \label{crit:poison-bound}
 If malicious contributors hold at most breadth share $f_s$ of the eligible population and an endpoint fact is reported only by them, then $C_s\le f_s$ and $C_t\le1$, so
 \begin{equation}
@@ -273,12 +273,10 @@ score(d,e)\le\alpha f_s+\beta
 =1-\alpha(1-f_s).
 \label{eq:poisonbound}
 \end{equation}
-Rejection is guaranteed when this upper bound is strictly below $\theta$, equivalently when
-$f_s<1-(1-\theta)/\alpha$. The criterion does not prove that an estimator correctly bounds $f_s$.
+Requiring this upper bound to fall strictly below $\theta$ constrains the parameters to $\alpha>(1-\theta)/(1-f_s)$, equivalently $f_s<1-(1-\theta)/\alpha$.
 \end{criterion}
-The closed-form guarantee applies to raw breadth $C_s$, where $f_s$ is a share of the eligible-site population. The bounded-A2 sweep and port-masquerading counterfactual therefore use raw $C_s$; Sec.~\ref{sec:sybil-results} evaluates the trust-weighted and clustered variants empirically.
 
-For $C_t=1$, $f_s=0.30$, and $\theta=0.65$, $\alpha>0.5$ is required. $\alpha=0.6$ bounds the score at 0.58 and covers shares below about 0.42, conditional on the external $f_s$ bound; the temporal split is heuristic.
+The constraint is what selects the operating point. At $\theta=0.65$ and $f_s=0.30$ it admits no $\alpha\le0.5$: a design weighting persistence at least as heavily as breadth could be carried past $\theta$ by fabrication volume alone. We take $\alpha=0.6$, which bounds an adversary-only score at 0.58 and tolerates breadth shares below about 0.42; Sec.~\ref{sec:sensitivity-results} prices this choice against the corpus optimum. The constraint is an arithmetic property of Eq.~\ref{eq:score}, not a security theorem: it inherits whatever bound the deployment governs $f_s$ by, applies to raw breadth $C_s$ only, and says nothing about contributors who accumulate genuine breadth. The bounded-A2 sweep and the port-masquerading counterfactual therefore use raw $C_s$; Sec.~\ref{sec:sybil-results} evaluates the trust-weighted and clustered variants empirically, and the temporal split within $\beta$ is heuristic.
 
 \textbf{Sybil-aware variants.} Trust weighting replaces raw breadth with
 \begin{equation}
@@ -319,7 +317,7 @@ The single-node Python registry (FastAPI, SQLAlchemy~2, SQLite) separates eviden
 \section{Evaluation}
 \label{sec:eval}
 
-We evaluate lifecycle safety (RQ1), proposal-volume/coverage trade-offs (RQ2), and adversarial admission (RQ3). RQ1 distinguishes finite-model verification from registry, gateway, and reconciliation tests. RQ2 separates UNSW reference-profile coverage from independent-deployment traffic agreement; candidate counts quantify proposal volume, a review-burden proxy, not measured operator effort. Precision/recall/F1 do not establish benignity or functional necessity. RQ3 distinguishes the conditional analytical bound from empirical mitigation; it tests admission, not approval.
+We evaluate lifecycle safety (RQ1), proposal-volume/coverage trade-offs (RQ2), and adversarial admission (RQ3). RQ1 distinguishes finite-model verification from registry, gateway, and reconciliation tests. RQ2 separates UNSW reference-profile coverage from independent-deployment traffic agreement; candidate counts quantify proposal volume, and Sec.~\ref{sec:loo-results} converts them into review cost per confirmed endpoint; operator time itself is not measured. Precision/recall/F1 do not establish benignity or functional necessity. RQ3 distinguishes the conditional analytical bound from empirical mitigation; it tests admission, not approval.
 
 \subsection{RQ1: Authorization Safety (G1, G4)}
 \label{sec:lifecycle-results}
@@ -471,17 +469,44 @@ YT & Union & 1387 & 100\% & .059 & .334 & .095 \\
 \end{tabular}
 \end{table}
 
-\textbf{Trade-off.} DIB reduces candidates by 96.4\% (US), 94.4\% (UK), and 92.3\% (YT) relative to union, increasing precision but reducing recall. Quorum provides most of the reduction. Scoring removes no further UK candidates; in YT it removes 31 without lowering recall. The class gate lowers recall for every receiver without improving US precision. DIB controls proposal volume rather than maximizing agreement F1: union performs better in US/UK, and QS performs better in YT. The additional filters therefore impose deployment-dependent coverage costs.
+\textbf{Trade-off and review cost.} DIB reduces candidates by 96.4\% (US), 94.4\% (UK), and 92.3\% (YT) relative to union. The four configurations are nested subsets of one queue, so they are operating points on a single review-cost curve (Table~\ref{tab:reviewcost}) rather than competing systems. Union attains higher macro F1 at US and UK, but only by presenting a queue 13--28 times larger: an operator inspects 5.5 (US), 4.3 (UK), and 28.3 (YT) union entries per endpoint the receiver actually observes, against 1.03, 1.16, and 2.89 under full DIB. Each additional confirmed endpoint that union recovers beyond DIB costs 6.5 (US), 5.1 (UK), and 106.7 (YT) further entries. Held at equal effort---a budget equal to the full-DIB queue---DIB confirms 35.0 versus 6.6 (US), 37.0 versus 10.0 (UK), and 37.0 versus 3.8 (YT) endpoints. The union figures assume arbitrary review order, because a pooled queue defines none; any ranking that would improve it is itself an admission filter, which is the mechanism under evaluation. Filtering therefore wins at every receiver once effort, rather than queue exhaustion, is the constraint. Within the filtered region the ordering is receiver-dependent: quorum already reaches 35.1 (US) and 36.7 (UK) at the same budget, and only YT separates the score and class stages (24.8, 30.0, 37.0). Quorum provides most of the reduction; the later stages pay for themselves at YT and are close to neutral at US and UK.
+
+\begin{table}[t]
+\centering
+\caption{Review cost of the same nested queues (six aligned device types, micro-aggregated). Confirmed counts candidates agreeing with a receiver-observed endpoint: agreement, not benignity. Budget yield fixes the number of inspected entries at that receiver's full-DIB queue size and reviews the unranked union queue in arbitrary order.}
+\label{tab:reviewcost}
+\scriptsize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Receiver & Filter & N & Conf. & Rev./conf. & Yield @budget \\
+\midrule
+US & Union & 1005 & 184 & 5.46 & 6.6 \\
+ & Q & 42 & 41 & 1.02 & 35.1 \\
+ & QS & 40 & 39 & 1.03 & 35.1 \\
+ & DIB (QSC) & 36 & 35 & 1.03 & 35.0 \\
+\midrule
+UK & Union & 767 & 178 & 4.31 & 10.0 \\
+ & Q & 48 & 41 & 1.17 & 36.7 \\
+ & QS & 48 & 41 & 1.17 & 36.7 \\
+ & DIB (QSC) & 43 & 37 & 1.16 & 37.0 \\
+\midrule
+YT & Union & 1387 & 49 & 28.31 & 3.8 \\
+ & Q & 177 & 41 & 4.32 & 24.8 \\
+ & QS & 146 & 41 & 3.56 & 30.0 \\
+ & DIB (QSC) & 107 & 37 & 2.89 & 37.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \textbf{Capture asymmetry.} Observation windows and endpoint-set sizes differ. Full-DIB bootstrap 95\% F1 intervals are [0.033,0.198] (US), [0.044,0.186] (UK), and [0.116,0.384] (YT); a busiest-single-day test gives F1 0.241/0.213/0.258. These six-device results do not rank receiving environments systematically; the artifact provides per-device counts and window diagnostics.
 
-\subsection{RQ3: Captured Attacks and Bounded Fabrications}
+\subsection{RQ3: Admission Inside the Breadth Bound}
 \label{sec:security-results}
 We test captured A1 observations separately from fabrications governed by the conditional bound. We inject 59 A1 facts at $k=1,\ldots,10$ pseudo-sites and test resolved-name and port-masquerading fabrications. Bounded A2 crosses 20 seeds and malicious-site fractions $\{.05,.1,.2,.3,.4,.5\}$, each realized by uniformly sampling the corresponding rounded number of pseudo-sites.
 
 DIB stages none of the 59 captured facts, whereas pooled union and frequency filtering stage all of them; their peers are unresolved IP addresses and remain below $\theta$ even when eligibility is bypassed. The baseline comparison quantifies the corresponding benign-coverage cost on the same seeded pseudo-site setting, with one exception: a locally observed endpoint left uncovered by the imported policy.
 
-The bounded-A2 sweep uses raw $C_s$, without trust weighting or clustering. Its sampled malicious-site share directly instantiates $f_s$, testing consistency with Criterion~\ref{crit:poison-bound} under controlled shares, not the deployment's ability to enforce that bound.
+The bounded-A2 sweep uses raw $C_s$, without trust weighting or clustering; its sampled malicious-site share directly instantiates $f_s$. Everything in this subsection is conditional on the deployment governing that share.
 
 The port-masquerading counterfactual holds other inputs fixed: ports 53/123 are eligible; the otherwise identical port-443 control is not. Extending fabrication to 120 days exceeds the one-day bounded-A2 maxima; both tests agree at the one-day horizon (0.354). Table~\ref{tab:portmasq} reports the largest quorum-clearing scores. At $f_s=0.30$, rejection throughout is consistent with the analytical upper bound 0.58. At $f_s=0.50$, outside the assumed region, the fact stages as \textsc{MonitorOnly}: admission failure adds a false proposal but cannot itself authorize enforcement.
 
@@ -500,21 +525,23 @@ $f_s$ & Horizon (days) & Score & Outcome \\
 \end{tabular}
 \end{table}
 
-\subsection{RQ3: Admission-Parameter Sensitivity (G5)}
+\textbf{Admission-parameter sensitivity (G5).}
 \label{sec:sensitivity-results}
-We sweep $\theta\in[0.50,0.80]$ and $\alpha\in[0.4,0.9]$ on Mon(IoT)r and YourThings~\cite{alrawi2019yourthings}; the selected $\alpha=0.6$ satisfies Criterion~\ref{crit:poison-bound}'s $\alpha>0.5$ requirement at $f_s=0.30$, $\theta=0.65$, bounding an adversary-only score at 0.58. At this operating point, Mon(IoT)r F1 is 0.054, against a corpus-best 0.071 at $\theta=0.50$ or $\alpha=0.9$: choosing parameters from the external threat bound rather than the corpus-specific optimum costs 0.017 F1. Criterion~\ref{crit:poison-bound} applies only to raw breadth, not trust-weighted admission.\footnote{The complete grid in the released artifact confirms the coverage--filtering trade-off described here.}
+We sweep $\theta\in[0.50,0.80]$ and $\alpha\in[0.4,0.9]$ on Mon(IoT)r and YourThings~\cite{alrawi2019yourthings}; the selected $\alpha=0.6$ satisfies Criterion~\ref{crit:poison-bound}'s $\alpha>0.5$ requirement at $f_s=0.30$, $\theta=0.65$, bounding an adversary-only score at 0.58. At this operating point, Mon(IoT)r F1 is 0.054, against a corpus-best 0.071 at $\theta=0.50$ or $\alpha=0.9$: choosing parameters from the external threat bound rather than the corpus-specific optimum costs 0.017 F1.\footnote{The complete grid in the released artifact confirms the coverage--filtering trade-off described here.}
 
 \textbf{Quorum sensitivity.} Using the licensed UNSW input, we reran the seed-42 pseudo-site sweep over feasible quorums $m\in\{1,2,3,5\}$ and site counts $N\in\{2,3,5,10\}$ ($m=4$ needs an undistributed trace). At $N=10$, $m=1,2,3,5$ each stage 346 facts and retain 63.17\% of the capture-observable macro ceiling, so this partition does not empirically distinguish the lower quorums --- not evidence that their adversarial tolerance is equivalent: $m=2$ remains the smallest point requiring two distinct reports, and a cold-start receiver logically needs $m$ external reporting sites. These are pseudo-site sensitivity results, not a consortium-size measurement.
 
-\subsection{RQ3: Fabricated Identities and Mitigations}
+\subsection{RQ3: Admission Outside the Breadth Bound}
 \label{sec:sybil-results}
-To stress admission beyond Criterion~\ref{crit:poison-bound}'s bounded-breadth assumption, we evaluate identity inflation. Raw counting stages the fabrication in 45/48 representative cells; trust weighting and clustering reject it, whereas RWV admits all 48. These are not guarantees: padding real endpoints defeats clustering at the extreme cell (score 0.905), and no tested Jaccard threshold in $[0.6,0.95]$ withstands every padding level (a false review candidate, not authorization escalation). The complete grid is in the artifact.
+Two tests leave Criterion~\ref{crit:poison-bound}'s assumption behind: fabricated identities exceed the breadth share, and behavioral drift stays consistent with it while being adversarial. Neither is covered by the analytical constraint, and both fail in the same restricted way---a false review candidate, never an authorization.
 
-\subsection{RQ3: Legitimate and Malicious Behavioral Change}
+\textbf{Fabricated identities.} We evaluate identity inflation. Raw counting stages the fabrication in 45/48 representative cells; trust weighting and clustering reject it, whereas RWV admits all 48. These are not guarantees: padding real endpoints defeats clustering at the extreme cell (score 0.905), and no tested Jaccard threshold in $[0.6,0.95]$ withstands every padding level. The complete grid is in the artifact.
+
+\textbf{Legitimate and malicious behavioral change.}
 \label{sec:drift-results}
 A synthetic rollout over 27 device types sweeps adoption $p\in\{.2,.4,.5,.6,.8,1\}$ and duration $D\in\{1,7,30,120\}$ over a 120-day horizon, labeling the same injected endpoint alternately as legitimate change or compromise. Both labels produce identical scores: 69 of 162 device-type/adoption cases admit within the horizon (median 7 days). Existing Active facts remain authorized for export and receive only a review flag.
 
-This result exposes the limit of telemetry-only admission: a rollout and a slow compromise with identical endpoints and cadence are indistinguishable. A review flag calls for operator or out-of-band investigation; it cannot justify automatic revocation or re-approval by resolving intent (Sec.~\ref{sec:discussion}).
+This result exposes the limit of telemetry-only admission: a rollout and a slow compromise with identical endpoints and cadence are indistinguishable. A review flag calls for operator or out-of-band investigation (Sec.~\ref{sec:discussion}).
 
 \subsection{Management-Path Feasibility and Reconciliation}
 \label{sec:scalability-results}
@@ -524,7 +551,7 @@ Nine correctness scenarios run 200 trials each; a retry-contention scenario runs
 
 \textbf{Distributed deployment.} An evidence service hosts shared Score state and dispute/restore transitions; ten independent site services host their own LocalDecision records and enforce revocation provenance locally. Dispute-open, confirming-dispute, and restore events fan out synchronously with bounded retries (3 attempts, 1~s each). For an unreachable site, a pending-fanout record retains the latest target state. Reconnection applies that record through the same idempotent path, ordered by a monotonic per-fact sequence number. This is a lifecycle/reconciliation mechanism under partial connectivity, not a claim of full distributed consistency.
 
-At 100 concurrent writers (5 repeated runs), throughput is $530.3\pm7.8$ operations/s and p99 latency $454.8\pm9.1$~ms: 67.0\% higher throughput and 13.0$\times$ lower p99 than the single-node registry. Median latency grows approximately linearly with load (9.5/35.9/90.7/168.7~ms at 1/10/50/100 writers). These comparisons involve different implementation stacks, as discussed below.
+At 100 concurrent writers (5 repeated runs) the distributed deployment sustains 530.3 operations/s with p99 latency $454.8\pm9.1$~ms and no unexpected errors across the 2,000 timed operations of that load point. Throughput rises from 112.6 operations/s at one writer to 547.9 at 50 and 530.3 at 100, so the ten site processes absorb an order-of-magnitude increase in offered load without collapse, and median latency grows approximately linearly (9.5/35.9/90.7/168.7~ms at 1/10/50/100 writers) rather than super-linearly. This is the management path under HTTP, including synchronous dispute and restore fan-out to ten sites. It is a single-host operating point on a 16-core machine, not a distributed-scalability limit; the single-node measurements above are in-process service calls under a different operation mix and are not comparable to it.
 
 \textbf{Missed-event reconciliation.} We run 40 fault-injection trials across four outage scenarios (Table~\ref{tab:faultinjection}). Three withhold one event type each. The compound case disconnects an Active site before dispute-open, confirming dispute, and restore, withholding the entire episode. Reconciliation must invalidate its stale grant directly from the final \textsc{MonitorOnly} target, without relying on prior receipt of Disputed. Thus collapsing pending events must preserve authorization invalidation, not merely the final state label. All 40 trials converge to the correct authoritative state after reconnection, applying exactly one collapsed fan-out record regardless of missed-event count. A further 20 trials, not tabulated, resolve races between reconciliation and new fan-out events correctly using sequence numbers.
 
@@ -547,7 +574,7 @@ Compound: dispute-open + confirming dispute + restore & 10 & \textsc{MonitorOnly
 \end{tabular}
 \end{table}
 
-Process restart ($\sim$0.45~s) dominates reconciliation logic ($<$0.1~s). Distributed services use direct SQLite access rather than the single-node SQLAlchemy/audit-history stack. This single-host operating point is not a performance upper bound; isolating distribution's contribution requires an equivalent-stack comparison.
+Process restart ($\sim$0.45~s) dominates reconciliation logic ($<$0.1~s). Distributed services use direct SQLite access and no audit-history table, whereas the single-node registry uses SQLAlchemy with audit history; the two are reported independently for that reason.
 
 \textbf{Architectural ablation.} Two alternatives contextualize per-site HTTP processes. Ten SQLite files across threads in one Python process showed no measurable improvement (p99 78.1~ms vs. 83.7~ms unsharded at 100 workers), consistent with GIL-serialized bytecode. Processes sharing files through SQLite \texttt{ATTACH} performed worse (p99 30.0~s vs. 78.7~ms unsharded, 10 workers across 16 processes; one diagnostic run), consistent with WAL shared-memory contention. A forced write interruption rolled back all attached files in that case; WAL does not generally guarantee cross-database atomicity during commit crashes. Independent per-site processes without shared files performed best among these three configurations.
 
@@ -556,7 +583,7 @@ Process restart ($\sim$0.45~s) dominates reconciliation logic ($<$0.1~s). Distri
 
 \textbf{Independent authority over shared evidence.} DIB makes approval validity and revocation origin explicit so shared emergency withdrawal cannot silently reuse approvals or erase local vetoes on restoration. Its management value is this lifecycle across administrative domains, not a judgment that approved traffic is appropriate. Review time, decision quality, and usability remain unmeasured.
 
-\textbf{Smaller queues, lower coverage.} Full-DIB macro F1 of 0.115--0.247 accompanies smaller queues: 462 candidates versus union's 24,121 in US full capture, and 36--107 for cold-start receivers versus, for example, YT's 1,387 union candidates (Tables~\ref{tab:workload}--\ref{tab:threelab}). Quorum supplies most of the reduction; further filtering trades coverage for fewer proposals rather than uniformly improving agreement. When missed proposals cost more than a longer queue, quorum-only or QS may be preferable. Admission choices do not replace lifecycle authorization checks.
+\textbf{Smaller queues, lower coverage.} Full-DIB macro F1 of 0.115--0.247 accompanies smaller queues: 462 candidates versus union's 24,121 in US full capture, and 36--107 for cold-start receivers versus, for example, YT's 1,387 union candidates (Tables~\ref{tab:workload}--\ref{tab:threelab}). The relevant question is not which queue scores higher when fully reviewed, but which one an operator can afford to review: pooled union costs 4.3--28.3 inspected entries per confirmed endpoint against DIB's 1.03--2.89 (Table~\ref{tab:reviewcost}). Quorum supplies most of that gain, and the later filters pay only at YT. Where an operator can exhaust the queue and a missed endpoint is costlier than a longer queue, quorum-only or QS remains the right operating point. Admission choices do not replace lifecycle authorization checks.
 
 \textbf{Coverage and transfer.} The 0.25 US/UK endpoint overlap is consistent with environmental variability~\cite{allowlistvariability}. UNSW pseudo-sites measure within-capture retention, not cross-organization transfer or independent-consortium quorum robustness (Sec.~\ref{sec:sensitivity-results}). The three-deployment transfer test remains limited to six aligned device types (Sec.~\ref{sec:loo-results}).
 
@@ -568,7 +595,7 @@ Process restart ($\sim$0.45~s) dominates reconciliation logic ($<$0.1~s). Distri
 \label{sec:conclusion}
 DIB manages local MUD policy lifecycles from shared IoT evidence. Admission creates proposals; local approval creates authority; disputes invalidate it; restoration requires renewed approval and preserves local revocations. A finite TLA+ model checks these properties across 3,837,084 reachable states. Registry and reconciliation tests exercise the management path, while OpenWrt/osMUD demonstrates firewall changes on a reachable gateway.
 
-The matched cold-start experiment reduces proposals by 92.3--96.4\% relative to union, with higher precision and lower recall. Quorum provides most of the reduction; additional filters impose receiver-dependent costs. UNSW retention is 63.2\% of observable macro behavior, with 7.9\% complete-profile recall. The utility of these smaller queues depends on local coverage requirements. Under the stated trust assumptions, DIB's lifecycle governs authorization and reversal without establishing benignity or replacing local review.
+The matched cold-start experiment reduces proposals by 92.3--96.4\% relative to union, with higher precision and lower recall. Quorum provides most of the reduction; additional filters impose receiver-dependent costs. UNSW retention is 63.2\% of observable macro behavior, with 7.9\% complete-profile recall. At a fixed review budget these smaller queues confirm 3.7--9.8$\times$ more endpoints than pooled union; whether that is the right operating point still depends on local coverage requirements. Under the stated trust assumptions, DIB's lifecycle governs authorization and reversal without establishing benignity or replacing local review.
 
 \begin{thebibliography}{00}
 

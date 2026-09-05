@@ -1,0 +1,13 @@
+receiver,stage,budget_candidates,queue_size,reviewed,expected_confirmed_at_budget,queue_fully_reviewed
+US,union,36,1005,36,6.591,no
+US,quorum,36,42,36,35.143,no
+US,quorum_score,36,40,36,35.1,no
+US,DIB,36,36,36,35.0,yes
+UK,union,43,767,43,9.979,no
+UK,quorum,43,48,43,36.729,no
+UK,quorum_score,43,48,43,36.729,no
+UK,DIB,43,43,43,37.0,yes
+YT,union,107,1387,107,3.78,no
+YT,quorum,107,177,107,24.785,no
+YT,quorum_score,107,146,107,30.048,no
+YT,DIB,107,107,107,37.0,yes

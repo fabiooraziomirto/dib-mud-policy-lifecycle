@@ -99,6 +99,21 @@ def check_utility() -> None:
     check("local-only 30-day macro F1", round(mean("local_only_30day_f1"), 3), 0.022, 0.0005)
     check("DIB + 30 days local macro F1", round(mean("dib_plus_30day_local_f1"), 3), 0.114, 0.0005)
 
+    cost = {(r["receiver"], r["stage"]): r for r in rows("results/review_cost/review_cost.csv")}
+    for receiver, union_cost, dib_cost in (("US", 5.46, 1.03), ("UK", 4.31, 1.16), ("YT", 28.31, 2.89)):
+        check(f"{receiver} union entries per confirmed endpoint",
+              round(float(cost[(receiver, "union")]["reviews_per_confirmed"]), 2), union_cost, 0.005)
+        check(f"{receiver} DIB entries per confirmed endpoint",
+              round(float(cost[(receiver, "DIB")]["reviews_per_confirmed"]), 2), dib_cost, 0.005)
+    budget = {(r["receiver"], r["stage"]): r for r in rows("results/review_cost/fixed_budget.csv")}
+    ratios = []
+    for receiver in ("US", "UK", "YT"):
+        dib = float(budget[(receiver, "DIB")]["expected_confirmed_at_budget"])
+        union = float(budget[(receiver, "union")]["expected_confirmed_at_budget"])
+        ratios.append(dib / union)
+    check("equal-budget yield ratio, minimum", round(min(ratios), 1), 3.7, 0.05)
+    check("equal-budget yield ratio, maximum", round(max(ratios), 1), 9.8, 0.05)
+
     matched = rows("results/three_lab_matched/matched_ablation.csv")
     for receiver, expected_reduction, expected_n in (("US", 96.4, 36), ("UK", 94.4, 43), ("YT", 92.3, 107)):
         row = next(r for r in matched if r["receiver"] == receiver and r["stage"] == "DIB")
@@ -158,7 +173,7 @@ def check_scalability() -> None:
 def check_claims_index() -> None:
     print("\nClaim index")
     claims = json.loads(text("claims.json"))
-    check("paper version", claims["paper_version"], "v31.1")
+    check("paper version", claims["paper_version"], "v32.0")
     check("selected configuration is graph-free", "gamma: 0" in text(claims["selected_configuration"]), True)
     missing = [p for c in claims["claims"] for p in (x.strip() for x in c["result"].split(","))
                if not (ROOT / p).exists()]
