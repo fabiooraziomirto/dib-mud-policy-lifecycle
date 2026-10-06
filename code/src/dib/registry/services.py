@@ -496,7 +496,7 @@ def local_revoke(
     port: int,
     reason: str | None = None,
 ) -> LocalDecision | None:
-    """The receiving site withdraws its own MonitorOnly or Active record.
+    """Record a local veto, including during a shared withdrawal episode.
 
     Unlike dispute_score(), this touches only site_id's LocalDecision row: it
     never fans out over score.local_decisions, and it leaves score.status and
@@ -512,10 +512,19 @@ def local_revoke(
         decision = get_local_decision(session, score.id, site_id)
         if decision is None:
             return None
-        if decision.state not in {DECISION_MONITOR_ONLY, DECISION_ACTIVE}:
+        if decision.state == DECISION_REVOKED:
+            last_revoke = session.scalar(
+                select(LocalDecisionVersion.event)
+                .where(LocalDecisionVersion.decision_id == decision.id,
+                       LocalDecisionVersion.event.in_({"local_revoke", "revoke"}))
+                .order_by(LocalDecisionVersion.id.desc()).limit(1)
+            )
+            if last_revoke != "revoke":
+                raise InvalidImportStateTransition("record is already locally revoked or has unknown provenance")
+        elif decision.state not in {DECISION_MONITOR_ONLY, DECISION_ACTIVE, DECISION_DISPUTED}:
             raise InvalidImportStateTransition(
                 f"cannot local-revoke {site_id}/{device_type}/{endpoint}/{protocol}/{port}: "
-                f"state is {decision.state!r}, expected {DECISION_MONITOR_ONLY!r} or {DECISION_ACTIVE!r}"
+                f"state is {decision.state!r}"
             )
         decision.state = DECISION_REVOKED
         decision.flagged_for_review = False

@@ -1,0 +1,54 @@
+{
+  "commands": [
+    [
+      "python3",
+      "code/scripts/pareto_frontier.py"
+    ]
+  ],
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "m_values": [
+      2,
+      3
+    ],
+    "operating_point": {
+      "m": 2,
+      "theta": 0.65
+    },
+    "receivers": [
+      "US",
+      "UK",
+      "YT"
+    ],
+    "theta_values": [
+      0.5,
+      0.525,
+      0.55,
+      0.575,
+      0.6,
+      0.625,
+      0.65,
+      0.675,
+      0.7,
+      0.725,
+      0.75,
+      0.775,
+      0.8
+    ]
+  },
+  "experiment": "pareto_frontier",
+  "inputs": {
+    "code/data/processed/moniotr_full_observations.csv": "6d2f0080b6221b4ca696687e91e3225bc37e6e7665d4575947731c4897a1911b",
+    "code/data/processed/yourthings_observations.csv": "b6db48840353f7a26c62ef53842a552561f1096a7fab1187ee1ebe44ae50ef8a",
+    "experiments/30_three_lab_loo/label_mapping_v16.csv": "ff16da1527f5bc99d5cf588842ea5f3391185963030bd529838b3a65fa8c89cb"
+  },
+  "metrics": {
+    "frontier_reference_rows": 45,
+    "sweep_cells": 78
+  },
+  "reused_unmodified": {
+    "experiments/33_v28_matched_ablation/matched_ablation.csv": true,
+    "experiments/38_union_ranked_budget/ranked_union_curve.csv": true
+  }
+}

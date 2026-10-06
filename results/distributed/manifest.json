@@ -1,0 +1,80 @@
+{
+  "caveats": [
+    "unexpected_errors is 1 at 50 writers (5 repetitions x 1,000 ops) and 0 at 1/10/100 writers. Do not report this run as error-free overall; the 3-repetition run records 3 unexpected errors at 100 writers.",
+    "The CSV stores no throughput standard deviation, only p99_latency_s_std. Any +/- on a throughput figure is unsupported by these files.",
+    "'contribute' is a no-op in this harness (no observation endpoint in the distributed prototype) and still counts in the throughput denominator: 2 of every 20 timed operations perform no work.",
+    "The script docstring claims the 'same 6-op mix as the other benchmarks'; _MIX_REALISTIC contradicts it. The code is authoritative.",
+    "Not comparable to experiments/35_v28_concurrency: that harness measures in-process SQLAlchemy service calls under a uniform 6-operation mix, this one measures HTTP to containers under a read-heavy mix.",
+    "Single-host operating point on one 16-core machine with no WAN latency; not a distributed-scalability limit.",
+    "Promotion only: the sha256 values below were computed at promotion time over the existing artefacts, not over a fresh run."
+  ],
+  "checksums": {
+    "code/scripts/distributed_concurrency_benchmark.py": "801110126e4d64d8b431a9c22c650ff0dd65f17b9c25e3868f4995d4ee19e69f",
+    "code/src/dib/registry/distributed/Dockerfile": "47fddd49af2da4948926d9e6aa979428e52939e30a0fbea20098e7a6dcf9cc99",
+    "code/src/dib/registry/distributed/docker-compose.yml": "cff989b69ea9740ffa27a060c22b614ec92570ab6edd11c88dbcd223e17277a5",
+    "code/src/dib/registry/distributed/generate_compose.py": "e791bcb24193089291a7d88f6585e5aef168b19d5a6be32e1c38152dde64bcf4",
+    "code/src/dib/registry/distributed/service.py": "54f635cb4fa9ef5c90d1b3f7db785ff39d8c8805d20ce5f653edb85739f3a43b",
+    "experiments/37_distributed_throughput/throughput_distributed_3rep.csv": "c458a3ebc0c8719bb3b7aaf6efe43418f7b470673fc98734b591023ea35a1e45",
+    "experiments/37_distributed_throughput/throughput_distributed_5rep.csv": "5f3dd90cfb662e59c99c895f054ef6867a16a48522324fa63f2209ec531766ad"
+  },
+  "command": [
+    "docker compose -f code/src/dib/registry/distributed/docker-compose.yml up -d --build",
+    "python3 code/scripts/distributed_concurrency_benchmark.py --worker-counts 1,10,50,100 --ops-per-worker 20 --warmup-ops 20 --repeats 5 --output outputs/distributed_concurrency/throughput_distributed_5rep.csv"
+  ],
+  "config": {
+    "operation_mix": "_MIX_REALISTIC, 20 entries: query x8, commit x7, contribute x2, attest x1, dispute x1, restore x1",
+    "ops_per_worker": 20,
+    "repeats_primary": 5,
+    "repeats_secondary": 3,
+    "seed": 0,
+    "storage": "direct sqlite3 access inside each container; no audit-history table",
+    "topology": "1 evidence container + 10 site containers (DIB_DIST_N_SITES=10), Docker Compose",
+    "transport": "HTTP/TCP via httpx.Client, timeout 5.0 s",
+    "warmup_ops_per_worker": 20,
+    "worker_counts": "1,10,50,100",
+    "worker_routing": "worker_id % 10 pins each worker to one site container"
+  },
+  "experiment": "distributed_management_path_throughput",
+  "hardware": {
+    "cpu_count": 16,
+    "platform": "Linux-6.8.12-18-pve-x86_64-with-glibc2.35",
+    "processor": "x86_64",
+    "python_implementation": "CPython",
+    "python_version": "3.10.13"
+  },
+  "label": "v32_distributed_throughput",
+  "provenance": "Promoted from code/outputs/distributed_concurrency/, which held the only paper result without an experiments/ directory. The CSV files are byte-identical copies; no benchmark was re-run for this promotion (see caveats).",
+  "results_5rep": {
+    "note": "total_ops is per repetition; unexpected_errors is summed over all 5 repetitions",
+    "p50_latency_s_mean": {
+      "1": 0.009463,
+      "10": 0.035883,
+      "100": 0.168679,
+      "50": 0.090719
+    },
+    "p99_latency_s_mean": {
+      "1": 0.019434,
+      "10": 0.070417,
+      "100": 0.454849,
+      "50": 0.176686
+    },
+    "p99_latency_s_std": {
+      "1": 0.001368,
+      "10": 0.006359,
+      "100": 0.009092,
+      "50": 0.008357
+    },
+    "throughput_ops_per_sec_mean": {
+      "1": 112.63,
+      "10": 305.53,
+      "100": 530.3,
+      "50": 547.95
+    },
+    "unexpected_errors": {
+      "1": 0,
+      "10": 0,
+      "100": 0,
+      "50": 1
+    }
+  }
+}

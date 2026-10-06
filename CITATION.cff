@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this artifact, please cite the paper below."
 title: "DIB: reproducibility artifact"
-version: "v31.1"
+version: "v42.0"
 license: MIT
 authors:
   # TODO: completare nome, cognome, affiliazione e ORCID prima di rendere pubblico il repository.
@@ -13,7 +13,7 @@ preferred-citation:
   title: "DIB: Managing Local MUD Policy Lifecycles with Shared IoT Traffic Evidence"
   journal: "IEEE Transactions on Network and Service Management"
   year: 2026
-  status: submitted
+  status: in-preparation
   authors:
     - family-names: "TODO"
       given-names: "TODO"

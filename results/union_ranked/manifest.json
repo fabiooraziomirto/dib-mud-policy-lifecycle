@@ -1,0 +1,34 @@
+{
+  "caveats": [
+    "Ranking the union queue by DIB's admission score gives the baseline the benefit of the mechanism under evaluation; it is an upper bound on what an unranked pooled queue can achieve with this signal, not a property of pooled union itself.",
+    "Burden is counted in queue entries, not operator time.",
+    "Six aligned device types only (label_mapping_v16.csv); same scope as Table tab:threelab."
+  ],
+  "command": "python3 code/scripts/union_ranked_budget.py",
+  "definitions": {
+    "confirmed": "union candidate matching a receiver-observed endpoint; traffic agreement, not benignity",
+    "ranked_union_depth_for_dib_yield": "entries the ranked union queue must expose before it has revealed as many confirmed endpoints as full DIB",
+    "union_arbitrary_expected": "the unranked convention used in experiments/36_review_cost/fixed_budget.csv",
+    "union_ranked_best": "upper bound over tie-breakings",
+    "union_ranked_expected": "expected confirmed endpoints in the top-`budget` entries of the union queue ranked by admission score, averaging over a uniformly random order within each tied score group",
+    "union_ranked_worst": "lower bound over tie-breakings"
+  },
+  "derivation": "re-scores the pooled union queue of experiments/33_v28_matched_ablation; no change to the admission pipeline",
+  "experiment": "score_ranked_union_at_fixed_review_budget",
+  "parameters": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "class_gate": "not applied (ranking only)",
+    "quorum": "not applied (ranking only)",
+    "theta": "not applied (ranking only)"
+  },
+  "scope": "same six aligned device types and same source/receiver split as Table tab:threelab",
+  "sha256": {
+    "code/data/processed/moniotr_full_observations.csv": "6d2f0080b6221b4ca696687e91e3225bc37e6e7665d4575947731c4897a1911b",
+    "code/data/processed/yourthings_observations.csv": "b6db48840353f7a26c62ef53842a552561f1096a7fab1187ee1ebe44ae50ef8a",
+    "code/scripts/moniotr_cross_lab.py": "b5fbab2daa450c685ee66e0b727d43eed37f3850d989fdb020bc17fd81a71d1c",
+    "code/scripts/union_ranked_budget.py": "3f927601a17d84893040a17366aa1f1e7541f8c2c05ef1992a6ad7a5dccaabaf",
+    "experiments/30_three_lab_loo/label_mapping_v16.csv": "ff16da1527f5bc99d5cf588842ea5f3391185963030bd529838b3a65fa8c89cb"
+  },
+  "source_experiment": "experiments/33_v28_matched_ablation"
+}

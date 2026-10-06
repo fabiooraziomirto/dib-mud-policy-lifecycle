@@ -1,0 +1,95 @@
+{
+  "scope": "in-process API campaign; actual SQLite services and MUD exports; no network timing",
+  "policies": [
+    {
+      "suspension_quorum": 1,
+      "facts": 100,
+      "sites": 10,
+      "aces_before_per_site": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "aces_after_one_reporter_per_site": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "aces_after_two_reporters_per_site": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "duplicate_reports_add_votes": false,
+      "local_vetoes_preserved": 100,
+      "restoration_requires_new_commits": true,
+      "old_votes_cleared": true
+    },
+    {
+      "suspension_quorum": 2,
+      "facts": 100,
+      "sites": 10,
+      "aces_before_per_site": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "aces_after_one_reporter_per_site": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "aces_after_two_reporters_per_site": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "duplicate_reports_add_votes": false,
+      "local_vetoes_preserved": 100,
+      "restoration_requires_new_commits": true,
+      "old_votes_cleared": true
+    }
+  ]
+}

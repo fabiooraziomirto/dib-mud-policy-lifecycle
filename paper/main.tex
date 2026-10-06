@@ -9,11 +9,19 @@
 \usepackage{textcomp,xcolor,booktabs,array,url,enumitem,multirow}
 \setlist{topsep=2pt,itemsep=1pt,parsep=0pt,leftmargin=*}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,automata,shapes.geometric}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,automata,shapes.geometric,calc}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18,table/col sep=comma}
 \usepgfplotslibrary{groupplots}
 \emergencystretch=1em
+% float packing: many small tables, default fractions leave large gaps
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.88}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
 \setlength{\textfloatsep}{6pt plus 2pt minus 2pt}
 \setlength{\floatsep}{4pt plus 2pt minus 2pt}
 \setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
@@ -29,7 +37,7 @@
 \maketitle
 
 \begin{abstract}
-Shared IoT traffic observations can support Manufacturer Usage Description (MUD) policy drafting across independent administrative domains, but provide evidence, not local authority. Device Intent Blueprint (DIB) separates shared evidence from per-site authorization through explicit approval, dispute, revocation, and restoration semantics. Only local operators authorize export; disputes invalidate authorization, and restoration requires renewed approval while preserving local revocations. A finite TLA+ model checks these properties across 3,837,084 reachable states; mutation controls expose restoration and site-confinement failures, and registry regression testing identified and corrected a revocation-handling mismatch. An OpenWrt/osMUD testbed validates policy application on a reachable gateway. A single-host, ten-site distributed deployment reconciles disconnected sites in 0.51~s; an extended finite model checks safety only among reachable, reconciled sites. A matched cold-start comparison across three deployments and six device types reduces candidate counts by 92.3--96.4\% relative to pooled observations, cutting review cost from 4.3--28.3 to 1.03--2.89 inspected candidates per confirmed endpoint while lowering recall. Quorum drives most of the reduction; additional filters have receiver-dependent costs. A separate reference-profile evaluation retains 63.2\% of observable macro behavior with 7.9\% complete-profile recall. DIB manages partial policy proposals under authenticated-consortium assumptions; it neither establishes benignity nor guarantees immediate withdrawal at unreachable gateways.
+Shared IoT traffic observations can help administrators create Manufacturer Usage Description (MUD) policies when manufacturer profiles are unavailable or outdated. Their lifecycle requires coordinated withdrawal while preserving local control over permissions. This paper presents Device Intent Blueprint (DIB), a framework that separates shared traffic evidence from local authorization. Candidate communications enter a review queue and generate MUD rules only after local approval. A shared dispute invalidates approvals, while restoration requires renewed review and preserves independent local revocations. DIB records approval validity and revocation origin, allowing disconnected sites to reconcile even after missing an entire withdrawal and restoration episode. Exhaustive exploration of finite lifecycle models finds no property violations, and six guard-removal mutations expose distinct authorization failures. An OpenWrt/osMUD testbed demonstrates rule application and withdrawal. Disconnected sites reconcile through a single collapsed update; the reconciliation logic takes under 100~ms in the evaluated deployment. Experiments on three IoT traffic datasets characterize candidate selection separately from authorization. Threshold admission restricts candidates under a bounded malicious-share assumption, while score-based ordering prioritizes review. Ranking the pooled candidate set achieves comparable review yield at matched budgets. These results support configurable candidate selection within a lifecycle that preserves local decisions during coordinated recovery.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -38,193 +46,243 @@ IoT security, Manufacturer Usage Description, distributed network management, ac
 
 \section{Introduction}
 \label{sec:introduction}
-Manufacturer Usage Description (MUD)~\cite{rfc8520} lets an Internet-of-Things (IoT) device advertise its intended communications, which a MUD manager translates into access-control rules. Manufacturer profiles may be unavailable or become stale as firmware and cloud services change~\cite{hernandezramos2021mudreview,allowlistvariability}; traffic observations can help draft or update them.
+Internet-of-Things (IoT) devices rely on network services for updates, remote control, and data exchange. Restricting their communications to the services they need can limit their exposure and the network activity of compromised devices~\cite{mirai,hernandezramos2021mudreview}. To support this approach, the Internet Engineering Task Force (IETF) standardized Manufacturer Usage Description (MUD)~\cite{rfc8520}. A MUD file describes a device's intended communications. A MUD manager translates this description into access-control rules for the local network.
 
-Sharing observations across administrative domains can seed proposals before sufficient local traffic is collected. An endpoint needed in one network may be unnecessary elsewhere, and compromised devices may contact attacker-controlled destinations~\cite{allowlistvariability,mirai}. Remote observations therefore supply evidence, not authority: cross-network agreement can prioritize review, while only the receiving site's operator can authorize activation.
+Manufacturer profiles may be unavailable or become outdated as firmware and cloud services change~\cite{hernandezramos2021mudreview,allowlistvariability}. Traffic observations can help administrators draft or update these profiles. Reports from other networks provide additional evidence when local observations are still limited. However, a service used in one network may be unnecessary in another, and observed traffic may include communications generated by compromised devices~\cite{allowlistvariability,mirai}. Administrators must therefore decide which proposed rules to apply in their own networks.
 
-Consider a camera without a manufacturer profile: two peer networks report a service, which the local administrator approves. A peer later disputes it. The management system must invalidate approval, propagate withdrawal to the gateway, and resolve the dispute without reusing old permissions or overriding local revocations. An approval prompt alone specifies neither this lifecycle nor reconciliation after disconnection.
+This decision is part of a policy lifecycle. Consider a camera without a manufacturer profile: two networks observe the same cloud service, and an administrator uses their reports to approve a local rule. If a contributor later disputes that service, the participating networks must withdraw the associated permissions. Once the dispute is resolved, the system must distinguish dispute-induced withdrawal from independent local revocation. It must preserve this distinction when reconciling a network that was disconnected throughout the episode.
 
-We present \emph{Device Intent Blueprint (DIB)}, a policy-management framework for independently administered networks, or \emph{sites}. A shared \emph{registry} separates evidence from per-site authorization records. An \emph{endpoint fact} identifies a communication by device type, direction, protocol, peer, and port. Eligible facts enter review as \textsc{MonitorOnly}, producing no MUD entry or firewall rule. A local approval, or \emph{commit}, makes the record \textsc{Active}, authorizing MUD export. Gateway fetch and application are separate: registry withdrawal does not immediately remove a rule at an unreachable gateway.
+This paper proposes \emph{Device Intent Blueprint (DIB)}, a framework for managing locally authorized MUD policies from shared IoT traffic observations. We call each independently administered network a \emph{site}. DIB groups observations into \emph{endpoint facts}, each identifying a device type, communication direction, protocol, peer, and port. The observations and contributor reports supporting a fact form its \emph{evidence}, and a \emph{registry} stores that evidence alongside separate records of each site's policy decisions.
 
-DIB tracks approval validity and revocation origin so restoration after shared withdrawal requires fresh approval without erasing local vetoes. This lifecycle, rather than traffic classification, is the management contribution; candidate filtering controls proposal volume without establishing benignity.
+DIB separates candidate selection from authorization. Selected facts enter MonitorOnly, where administrators review them without creating MUD rules. Local approval moves a fact to Active for export. A shared dispute invalidates approvals; restoration requires renewed review and preserves local revocations. Ordered updates reconcile sites that missed intermediate changes.
 
-The paper makes three contributions:
-\begin{itemize}
-\item \textbf{Lifecycle semantics.} We separate shared evidence from local authority and define approval, dispute, revocation, restoration, and export transitions. A finite TLA+ model checks authorization safety and preservation of local vetoes over 3,837,084 reachable states.
-\item \textbf{Execution and reconciliation.} A registry and OpenWrt/osMUD testbed connect lifecycle decisions to MUD export and firewall updates. A ten-site distributed deployment tests reconciliation after missed dispute/restore events; an extended finite model checks safety among reachable, reconciled sites.
-\item \textbf{Proposal-volume trade-offs.} UNSW-IoTraffic~\cite{sivanathan2019classifying}, Mon(IoT)r~\cite{moniotr}, and YourThings~\cite{alrawi2019yourthings} experiments quantify candidate reduction, coverage loss, and cold-start transfer. Matched ablations isolate quorum and filter effects; adversarial tests distinguish conditional rejection from empirical mitigation.
-\end{itemize}
+
+Existing approaches cover profile extraction, evidence sharing, and coordinated authorization (Table~\ref{tab:positioning}). DIB addresses recovery across independent authorities by combining deny-overrides and a last-writer-wins pending register with explicit approval validity and revocation origin. Together, these records determine whether a recovering site must return a fact to review or retain an independent local veto.
+
+The main contributions are: (1)~a policy lifecycle and reconciliation mechanism that preserve local authorization during shared withdrawal and recovery, including after missed episodes; (2)~a registry and distributed prototype, evaluated through finite-state verification, controlled ablations, recovery experiments, and OpenWrt/osMUD enforcement; (3)~a matched evaluation on three IoT traffic datasets that distinguishes the effects of candidate admission and review ordering.
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related-work} reviews related work. Section~\ref{sec:threat} defines the setting and design goals. Section~\ref{sec:design} presents DIB. Sections~\ref{sec:impl} and~\ref{sec:eval} describe the implementation and evaluation. Finally, Section~\ref{sec:discussion} discusses implications and limitations.
 
 \section{Related Work}
 \label{sec:related-work}
-RFC~8520 leaves MUD profile authoring and management to administrators~\cite{rfc8520}. Prior work extracts or enforces profiles from local traffic within one administrative domain~\cite{clearasmud,hamzatdsc,mudflow,CornoMannella2023GatewayMUD,osmud,mudscope}, rather than governing shared observations across domains.
+RFC~8520 leaves the local application of MUD recommendations to the network administrator and calls for policy updates to respect deployment-specific approval flows~\cite[Secs.~1.1 and~1.8]{rfc8520}. A parallel IETF effort standardizes MUD URL reissuance~\cite{mudacceptableurls}, which concerns authority over manufacturer-URL updates. DIB governs operator-approved facts derived from traffic observations. Prior work extracts or enforces profiles from local traffic within one administrative domain~\cite{clearasmud,hamzatdsc,mudflow,CornoMannella2023GatewayMUD,osmud,mudscope} rather than governing observations shared across domains.
 
-Threat-intelligence sharing (MISP, STIX), contributor reputation~\cite{wagner2016misp,stix21,eigentrust,trustsurvey}, and collaborative IoT learning (CoLearn, D\"IoT, IoT Inspector)~\cite{colearn,ndiot2019,iotinspector,vasilomanolakis2015collaborative} provide related mechanisms for aggregating evidence, traffic models, or anomaly reports. Evidence quality alone does not authorize network reachability.
-
-Cross-domain policy frameworks address distributed authoring, provenance, or consistency~\cite{pbnm,rfc9315,matheu2019mudtesting,blockchainmud,fidem,liuzerotrust2024,sun2025sanitizable,polaris,alshaer2004firewall,chowdhary2022intent,pipeconf2022,vergutz2023data}. DIB focuses on how shared disputes and restoration interact with independent local decisions. No published system combines MUD policy objects, evidence contributed across administrative domains, and a per-site authorization record with dispute-driven withdrawal and restoration. MUD work operates inside one domain~\cite{clearasmud,hamzatdsc,mudflow,CornoMannella2023GatewayMUD,osmud,mudscope}; cross-domain access-control frameworks operate on identity and policy objects carrying no notion of contributed traffic evidence~\cite{polaris,liuzerotrust2024,sun2025sanitizable}; evidence-sharing platforms distribute indicators without a local authorization record to invalidate~\cite{wagner2016misp,stix21,colearn,ndiot2019}; and blockchain-backed MUD distribution~\cite{blockchainmud} makes profiles tamper-evident without separating shared evidence from site-local authority. The available reference points are therefore the two ends of the design space DIB sits between: pooled union, which stages every shared observation, and reputation-weighted voting, which weights contributors but still yields one shared verdict. We evaluate against both (Sec.~\ref{sec:impl}). Table~\ref{tab:comparison} accordingly compares defined workflow semantics: the alternatives are the restoration rules a system can implement, not deficiencies of any particular prior system. DIB contributes their composition for shared MUD proposals, finite-state verification, and executable withdrawal and re-approval.
+Threat-intelligence sharing (MISP, STIX), contributor reputation~\cite{wagner2016misp,stix21,eigentrust,trustsurvey}, and collaborative IoT learning (CoLearn, D\"IoT, IoT Inspector)~\cite{colearn,ndiot2019,iotinspector,vasilomanolakis2015collaborative} aggregate evidence, traffic models, or anomaly reports. These approaches share information rather than grant network access, and therefore specify no withdrawal semantics for permissions already installed at a recipient.
 
 \begin{table}[t]
 \centering
-\caption{Defined workflow alternatives for one fact, initially approved at site $s$. The sequence is local revoke at $s$, peer dispute, then global restore.}
-\label{tab:comparison}
+\caption{Positioning against the closest related systems. ``Disconnected'': what happens to a participant that misses a withdrawal. ``Origin'': whether shared restoration distinguishes dispute-induced revocation from independent local revocation.}
+\label{tab:positioning}
 \scriptsize
-\begin{tabular}{@{}p{2.1cm}p{2.3cm}p{2.65cm}@{}}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.52cm}>{\raggedright\arraybackslash}p{1.32cm}>{\raggedright\arraybackslash}p{1.84cm}>{\raggedright\arraybackslash}p{1.56cm}>{\raggedright\arraybackslash}p{1.26cm}@{}}
 \toprule
-Workflow & Global-restore rule & Result at $s$ \\
+Approach & Authority & Propagated & Disconnected & Origin \\
 \midrule
-Approval + persistent approval bit & Reuse old approval & Permission can return without fresh approval \\
-Approval + review reset & Reset all revoked records to review & No permission, but local veto is erased \\
-Provenance-aware review (DIB) & Reset only dispute-derived records & Local revocation survives; no permission \\
+MUD extraction~\cite{clearasmud,hamzatdsc,mudscope} & single domain & none (no sharing) & n/a & n/a \\
+Evidence sharing~\cite{wagner2016misp,stix21,colearn} & recipient & reports, models & unspecified & not modeled \\
+FIDEM~\cite{fidem} & manufacturer & profile, URL updates & re-check on reconnect & n/a \\
+POLARIS~\cite{polaris} & resource owner & bound sessions & session expiry & n/a \\
+Zanzibar~\cite{zanzibar} & one global service & consistency tokens & blocks on staleness & single origin \\
+\textbf{DIB} & \textbf{each site} & \textbf{ordered lifecycle targets} & \textbf{stale grant voided} & \textbf{preserved} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+Policy-based management and intent frameworks address policy specification, conflicts, and configuration~\cite{pbnm,rfc9315,alshaer2004firewall,chowdhary2022intent,pipeconf2022,vergutz2023data}. POLARIS lets resource owners decide access from verifiable attributes and binds access to sessions~\cite{polaris}. FIDEM verifies device--MUD-class binding and propagates profile updates through URL reissuance or signature-change checks~\cite{fidem}. Their workflows address identity-based access and profile authenticity, respectively. DIB assumes established identities and specifies how shared withdrawal invalidates per-site approvals, how restoration preserves local vetoes, and how sites reconcile after missed episodes. Dynamic and security-tested MUD profiles~\cite{blockchainmud,matheu2019mudtesting} also motivate profile evolution.
+
+The deny-overrides combining rule in XACML and policy frameworks~\cite{xacml3,ponder} resolves conflicting decisions during policy evaluation. DIB retains the origin of a revocation across updates so that a shared restore preserves a local denial. Zanzibar~\cite{zanzibar} addresses stale authorization through consistency tokens in a globally coordinated service, where one authority both grants and revokes. DIB propagates withdrawal to sites that grant permissions independently and reconciles unreachable sites after reconnection. Its pending target follows a last-writer-wins register~\cite{crdt}, with local guards preserving revocation origin.
+
 \section{Threat Model and Goals}
 \label{sec:threat}
 
-We consider a closed consortium of sites controlling their own gateways. Remote reports are distinct from local authorization.
+We consider a closed consortium of independently administered networks, called sites. Members share observations about endpoint facts, while each site controls the rules installed at its gateway. We address the risk that shared updates reinstate a withdrawn permission or erase a local denial during recovery.
 
 \subsection{Setting and Trust Boundary}
 \label{subsec:trust}
-The deployment is assumed to authenticate consortium membership out-of-band (e.g., mutual TLS with enterprise PKI), reject unauthenticated contributions, encrypt and authenticate registry communication, and enforce identities and roles. Device-taxonomy alignment is assumed complete before ingestion. Admission additionally assumes malicious contributors control at most fraction $f_s$ of the eligible reporting population for a device type (Sec.~\ref{sec:scoring}); identity-inflation tests deliberately exceed this bound.
+Deployment requires authenticated membership and role enforcement. One deployment option is mutual TLS with enterprise public-key infrastructure (PKI), binding each member certificate to a site identifier and its permitted API operations. Device-type labels must also be aligned before ingestion. The prototype does not validate this authentication integration; the experiments exercise the lifecycle with trusted caller identities. Admission further assumes that malicious contributors control at most a fraction $f_s$ of the eligible reporting population for a device type (Sec.~\ref{sec:scoring}). Identity-inflation tests deliberately exceed this bound.
 
-We evaluate three distinct adversarial behaviors: (i)~\textbf{A1 (Poisoned Observations),} where an honest site captures and reports real malicious flows from an already compromised device; (ii)~\textbf{A2 (Fabricated Evidence),} where contributors report fabricated traffic that did not occur (bounded by breadth share $f_s$, or unbounded in Sybil stress tests); and (iii)~\textbf{A3 (Low-and-Slow Behavioral Drift),} where attacker activity is distributed across sites to mimic a legitimate rollout.
+\textbf{Policy authority.} DIB produces locally authorized MUD files: the receiving site's MUD manager signs these exports and the gateway trusts that site's policy-signing authority. Peer sites and the shared evidence service can therefore request withdrawal but cannot issue local permissions. This trust configuration is a deployment requirement. The enforcement testbed uses unsigned exports with signature validation disabled.
 
-Local operators are sovereign within their domain: misuse of a local commit or revocation is an insider threat, not a cross-site authorization failure. Attackers may pollute review queues or disrupt availability through baseless disputes, but disputes are restrictive and cannot create \textsc{Active} authorization. A3 exposes an observational limit: identical traffic patterns yield identical scores regardless of benignity or intent~\cite{mirai,allowlistvariability}. Without a local commit, admitted patterns remain unprivileged \textsc{MonitorOnly} candidates. Authorization tokens belong to the receiving site's local state and cannot be created by remote contributors.
+We evaluate three distinct adversarial behaviors: (i)~\textbf{A1 (Poisoned Observations)}, where an honest site captures and reports real malicious flows from an already compromised device; (ii)~\textbf{A2 (Fabricated Evidence)}, where contributors report fabricated traffic that did not occur (bounded by breadth share $f_s$, or unbounded in Sybil stress tests); and (iii)~\textbf{A3 (Low-and-Slow Behavioral Drift)}, where actual device activity changes gradually across sites to mimic a legitimate rollout. A2 tests invented reports; A3 tests the ambiguity of observed behavior.
 
-\textbf{Consortium authority.} A participating site can raise a dispute; the first dispute suspends export and a second distinct site confirms revocation. Global restoration is a privileged consortium operation whose authorization must be supplied by the deployment, and local approval, revoke, and restore must be bound to the receiving site's operator: local control means exclusive creation of permissions, while consortium members accept shared emergency withdrawal. This deliberately favors restriction over availability, as a malicious member can interrupt service.
+Local operators authorize permissions within their own domain, so misuse of a local approval or revocation is an insider action. Remote contributors can introduce unsuitable candidates or raise baseless disputes, but neither creates local authorization. Under A3, legitimate and malicious activity with identical traffic patterns produce the same evidence and score, and separating them requires local review or out-of-band information.
 
-\textbf{Scope of the safety properties.} I1--I3 (Sec.~\ref{subsec:lifecycle}) concern lifecycle transitions under authenticated identities. The prototype and finite model expose transitions to a trusted harness; correct caller authentication and role enforcement are deployment assumptions, not implemented or verified mechanisms.
+\textbf{Consortium authority.} Any participating site can raise a dispute. The first report suspends export, and a report from a second distinct site confirms revocation. Global restoration is a privileged consortium operation; local approval, revocation, and restoration are reserved for the receiving site's operator. Sec.~\ref{sec:suspension-policy} evaluates the availability trade-off of one versus two reporters. The safety properties I1--I3 (Sec.~\ref{subsec:lifecycle}) concern lifecycle transitions under authenticated identities: the prototype and finite model expose transitions to a trusted harness, so caller authentication and role enforcement are deployment assumptions rather than verified mechanisms.
 
 \subsection{Design Goals}
-We formulate five core design goals:
+DIB has four design goals:
 \begin{itemize}
-\item \textbf{G1 (Local Authorization Sovereignty):} Export only locally approved endpoint facts representable as valid MUD access-control entries (ACEs).
-\item \textbf{G2 (Zero-Profile Bootstrapping):} Propose review candidates for newly observed devices even when manufacturer profiles are absent.
-\item \textbf{G3 (Candidate-Volume Reduction):} Reduce the number of proposals presented for review relative to pooling all observations.
-\item \textbf{G4 (Non-Destructive Rescoring):} Allow evolving evidence to update candidate scores without silently altering existing local approvals.
-\item \textbf{G5 (Adversarial Rejection):} Reject facts supported only by malicious contributors when their population share and the score parameters satisfy the bound in Section~\ref{sec:scoring}.
+\item \textbf{G1 (Local authorization).} Export permissions only after approval by the receiving site's administrator.
+\item \textbf{G2 (Candidate discovery).} Propose communications from shared observations when manufacturer profiles are unavailable.
+\item \textbf{G3 (Review workload).} Filter and prioritize candidates for administrator review.
+\item \textbf{G4 (Decision stability).} Evidence and score changes must not grant or revoke permissions; disputes and operator actions follow the lifecycle rules.
 \end{itemize}
-G1 and G4 protect authorization; G2, G3, and G5 concern candidate quality. Gateways determine effective enforcement.
 
-\section{Device Intent Blueprint}
+\textbf{P5 (Conditional admission protection).} With \emph{raw breadth} (the unweighted fraction of eligible sites reporting a fact), admission rejects adversary-only evidence under the share bound in Sec.~\ref{subsec:trust} and parameter constraint in Criterion~\ref{crit:poison-bound}. This does not establish benignity; Sec.~\ref{sec:sensitivity-results} evaluates its limits.
+
+\section{Proposed Approach}
 \label{sec:design}
-DIB separates candidate admission, site-local export authorization, and gateway application.
+DIB comprises a shared evidence service and independently administered site services (Fig.~\ref{fig:architecture}). The evidence service receives observations and distributes candidates and ordered lifecycle updates. Each site retains its decisions, operator interface, and MUD exporter. Its service applies shared updates, preserves local revocations, and exports approved facts to the MUD manager.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[scale=0.72,transform shape,>=Stealth,
+ component/.style={draw,rounded corners,align=center,font=\small,minimum height=0.65cm,text width=2.4cm,fill=white},
+ flow/.style={->,thick},
+ event/.style={->,thick,dashed},
+ labeltext/.style={font=\footnotesize,align=center,fill=white,inner sep=1.5pt}]
+\node[component,text width=7cm,minimum height=0.95cm] (evidence) at (0,0)
+ {Shared evidence service\\Observations, candidate selection, disputes, ordered pending updates};
+\foreach \side/\inner/\outer/\name in {a/-2.25/-5.7/A,b/2.25/5.7/B}{
+ \node[component] (collector-\side) at (\outer,-1.65) {Traffic collector\\and adapter};
+ \node[component] (operator-\side) at (\outer,-2.80) {Local operator};
+ \node[component,minimum height=0.95cm] (site-\side) at (\inner,-2.80) {Site service\\Decisions and\\revocation origin};
+ \node[component] (export-\side) at (\inner,-3.95) {MUD exporter};
+ \node[component] (manager-\side) at (\outer,-3.95) {MUD manager};
+ \node[component] (gateway-\side) at (\outer,-4.95) {Gateway\\Applied rules};
+ \draw[flow] (operator-\side) -- node[labeltext,above]{local\\actions} (site-\side);
+ \draw[flow] (site-\side) -- node[labeltext,right]{approved facts} (export-\side);
+ \draw[flow] (export-\side) -- node[labeltext,above]{MUD} (manager-\side);
+ \draw[flow] (manager-\side) -- node[labeltext,right]{rules} (gateway-\side);
+ \begin{scope}[on background layer]
+  \node[draw,dashed,rounded corners,fit=(collector-\side)(site-\side)(operator-\side)(gateway-\side)(export-\side),inner sep=0.25cm,
+  label={[font=\small,anchor=south west]north west:Site \name}] {};
+ \end{scope}
+}
+\draw[flow] (collector-a.north) |- node[labeltext,pos=0.30,left]{observations} (evidence.west);
+\draw[flow] (collector-b.north) |- node[labeltext,pos=0.30,right]{observations} (evidence.east);
+\draw[event] ([xshift=-2.25cm]evidence.south) -- node[labeltext,right,pos=0.47]{candidates;\\lifecycle updates} (site-a.north);
+\draw[event] ([xshift=2.25cm]evidence.south) -- node[labeltext,right,pos=0.47]{candidates;\\lifecycle updates} (site-b.north);
+\end{tikzpicture}
+\caption{DIB's distributed architecture. Dashed boxes delimit local administrative authority. Solid arrows carry observations, local decisions, and policy output; dashed arrows carry shared candidates and lifecycle updates, which disconnected sites retrieve on reconnection. The MUD manager and gateway may be co-located, as in the OpenWrt testbed.}
+\label{fig:architecture}
+\end{figure*}
 
 \subsection{Records and Operational Flow}
 \label{subsec:endpoint-facts}
-For device type $d$, an endpoint fact is $f=(d,e)$, where $e=(\text{direction},\text{protocol},\text{peer},\text{port})$. The peer is an FQDN or remote IP address; normalization prefers an observed FQDN when available. Scoring uses outbound tuples since the evaluated traffic predominantly concerns device-initiated communications; the exporter can also generate return-flow ACEs.
+For device type $d$, an endpoint fact is $f=(d,e)$, where $e=(\text{direction},\text{protocol},\text{peer},\text{port})$. The peer is a fully qualified domain name (FQDN) or remote IP address. Before scoring, adapters associate observed names with addresses and normalize protocol labels. Names come from DNS records or HTTP/TLS metadata, depending on the dataset; the remaining fields come from the flow's direction, protocol, and port. Scoring uses outbound communications because the evaluated captures predominantly contain device-initiated traffic. The exporter can also generate return-flow entries.
 
-The registry keeps two kinds of record. \emph{Shared evidence records} store observations, reporters, timestamps, and attestations as audit provenance: \textsc{contribute} records traffic idempotently, \textsc{attest} records a site's explicit stance on an admitted fact, and reporter counts give audit tiers (Local, Corroborated, Consortium-attested) that help review but grant no permission. \emph{Site-local authority records} store each receiving site's decision, approval validity, and revision history independently of the evidence.
+The registry is the logical record model for shared evidence and per-site decisions. The single-registry implementation stores both in one service. In the distributed prototype, the shared evidence service holds only shared records; each site stores its own decisions (Sec.~\ref{sec:scalability-results}). Shared records contain observations, reporting sites, timestamps, and attestations. The contribute operation deduplicates submissions; attest records a positive site assessment. \emph{Local} evidence fails admission; \emph{Corroborated} evidence meets the endpoint, reporting-site, score, and dispute checks for review (Sec.~\ref{sec:scoring}). Three distinct positive attestations promote an undisputed Corroborated record to \emph{Consortium-attested}. These labels establish neither benignity nor permission to communicate.
 
-\textbf{Following the camera proposal.} In Sec.~\ref{sec:introduction}'s example, eligibility, reporter count, persistence, and dispute checks (Sec.~\ref{sec:scoring}) produce a \textsc{MonitorOnly} proposal, not a packet-monitoring rule. Local approval creates fresh authorization in \textsc{Active}; the serializer emits a MUD ACE for the gateway to fetch and apply.
+Site-local records hold decisions and their revision history. A \textsc{query} stages an admissible fact as MonitorOnly if the site has no record, or returns its existing decision; it is therefore not a read-only operation. MonitorOnly places a proposal in the operator's review queue without generating a network rule. Local approval is recorded through \textsc{operator-commit} (a local commit), the only operation that authorizes export. Decision history records lifecycle events and the resulting state, actor, time, and reason where supplied, allowing restoration to distinguish a local veto from shared withdrawal.
 
-A dispute invalidates authorization at all sites; gateways must apply the regenerated policy to withdraw installed permissions. A second independent dispute confirms revocation. Restoration returns applicable records to review without erasing local revocations (Table~\ref{tab:transitions}); Fig.~\ref{fig:admission-flow} shows the forward path.
+\textbf{From observations to a MUD rule.} For the camera example (Table~\ref{tab:record-example}), two sites report TCP traffic to \texttt{api.vendor.example} on port 443. Once admitted, the fact enters site A's review queue as MonitorOnly. An \textsc{operator-commit} moves it to Active, and the exporter emits an access-control entry (ACE) matching the destination DNS name and TCP port in the from-device access-control list (ACL), which the MUD manager resolves and installs. Site B requires its own approval. Withdrawal regenerates the site's policy, which the gateway must apply to remove installed permissions. Table~\ref{tab:transitions} specifies the recovery transitions.
 
-\begin{figure}[t]
+\begin{table}[t]
 \centering
-\begin{tikzpicture}[>=Stealth,every node/.style={font=\footnotesize},
-stg/.style={draw,rounded corners,align=center,text width=5.6cm,minimum height=0.65cm},
-node distance=0.42cm]
-\node[stg] (evidence) {Shared observations\\Endpoint facts and reporting provenance};
-\node[stg,below=of evidence] (review) {\textsc{MonitorOnly}: eligible for local review\\No MUD entry or firewall permission};
-\node[stg,below=of review] (active) {\textsc{Active}: locally approved for export\\Current local authorization required};
-\node[stg,below=of active] (gateway) {MUD file $\rightarrow$ gateway firewall rules\\Effective after fetch and reload};
-\draw[->] (evidence)--node[right,font=\scriptsize]{admission filter}(review);
-\draw[->] (review)--node[right,font=\scriptsize]{local commit}(active);
-\draw[->] (active)--node[right,font=\scriptsize]{export and apply}(gateway);
-\end{tikzpicture}
-\caption{Separate evidence, authorization, and enforcement steps. Admission creates proposals; local commit authorizes export; gateway application changes connectivity. Withdrawal invalidates authorization; restoration requires renewed approval.}
-\label{fig:admission-flow}
-\end{figure}
+\caption{Illustrative records and export for the camera example. Field groups summarize stored information, not an API serialization.}
+\label{tab:record-example}
+\scriptsize
+\begin{tabular}{@{}p{1.5cm}p{5.6cm}@{}}
+\toprule
+Record & Example contents \\
+\midrule
+Endpoint fact & (camera, out, TCP, \texttt{api.vendor.example}, 443) \\
+Evidence & Reporters A and B; observation timestamps and counts; computed admission score \\
+Site A decision & Active after A's commit; valid approval; commit event in decision history \\
+Site B decision & MonitorOnly; no approval; no exported rule \\
+Site A MUD ACE & Destination DNS name \texttt{api.vendor.example}; IP protocol 6; TCP destination port 443; forwarding accept \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Site-Local Authority Lifecycle}
 \label{subsec:lifecycle}
-At each site $s$, an endpoint fact $f$ resides in one of five authorization states:
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=0.76,transform shape,>=Stealth,
+box/.style={draw,rounded corners,align=center,minimum width=2.15cm,
+minimum height=0.55cm,font=\footnotesize},
+lab/.style={font=\scriptsize,fill=white,inner sep=1.5pt}]
+\node[font=\footnotesize,anchor=west] at (-1.1,0.65) {(a) Shared withdrawal and recovery};
+\node[box] (review) at (0,0) {MonitorOnly};
+\node[box] (active) at (4.0,0) {Active};
+\node[box] (revoked) at (0,-1.35) {Revoked (Dispute)};
+\node[box] (disputed) at (4.0,-1.35) {Disputed};
+\draw[->] (review)--node[lab,above]{local commit}(active);
+\draw[->] (active)--node[lab,right]{first dispute}(disputed);
+\draw[->] (disputed)--(revoked);
+\node[lab] at (2,-1.82) {second distinct reporter};
+\draw[->] (revoked)--node[lab,left]{global restore}(review);
+\draw[->] (disputed.north west)--node[lab,sloped,above]{global restore}(review.south east);
+\node[font=\footnotesize,anchor=west] at (-1.1,-2.15) {(b) Independent local veto};
+\node[box] (source) at (0,-2.8) {Any staged state};
+\node[box] (local) at (4.0,-2.8) {Revoked (Local)};
+\draw[->] (source)--node[lab,above]{local revoke}(local);
+\node[box] (reviewb) at (0,-3.85) {MonitorOnly};
+\draw[->] (local.south)--(4,-3.85)--(reviewb.east);
+\node[lab] at (2,-4.2) {local restore; no open dispute};
+\end{tikzpicture}
+\caption{Recovery paths for an admitted fact. A local veto can be recorded from MonitorOnly, Active, Disputed, or Revoked (Dispute), and survives global restore. Panel (a) shows withdrawal from Active; all guards are in Table~\ref{tab:transitions}.}
+\label{fig:lifecycle}
+\end{figure}
+Figure~\ref{fig:lifecycle} summarizes the transitions. At each site $s$, an endpoint fact $f$ resides in one of five authorization states:
 \[
 S=\{\text{Absent},\text{MonitorOnly},\text{Active},\text{Disputed},\text{Revoked}\}.
 \]
-These states track administrative authorization, distinct from gateway enforcement. \textsc{Active} indicates that site $s$'s operator has authorized fact $f$ for policy export. Each approval creates a fresh local authorization instance. The Boolean $\texttt{grantValid}[s][f]$ records whether that instance remains valid; here, ``token'' denotes authorization state, not a bearer credential. A fact is exportable if and only if:
+Revoked (Dispute) and Revoked (Local) share state Revoked but differ in the separately stored revocation origin.
+Each local approval enters Active and creates a fresh \emph{grant}, tracked by $\texttt{grantValid}[s][f]$. Export requires both:
 \begin{equation}
 \begin{aligned}
-\mathrm{Exportable}(s,f) \iff{}&\ \mathrm{state}(s,f)=\textsc{Active}\\[-2pt]
+\mathrm{Exportable}(s,f) \iff{}&\ \mathrm{state}(s,f)=\text{Active}\\[-2pt]
 &\land\ \mathrm{grantValid}(s,f).
 \end{aligned}
 \label{eq:exportable}
 \end{equation}
 
-Let $\Sigma$ be the lifecycle events, including queries, commits, disputes, and restorations. We write $\delta: S\times\Sigma\rightarrow S$ for the state projection of the record transition; guards also depend on authorization validity, dispute status, and revocation origin (Table~\ref{tab:transitions}). Absent means not staged; Disputed means suspended; Revoked retains whether withdrawal was local or dispute-derived.
-
+Table~\ref{tab:transitions} gives the transitions and guards, which also depend on grant validity, dispute status, and revocation origin.
 \begin{table*}[t]
 \centering
-\caption{Lifecycle transitions. A second dispute must come from a site distinct from the opener. Undefined transitions leave the record unchanged or are rejected.}
+\caption{Lifecycle transitions. Parenthetical labels on Revoked indicate revocation origin; slashes separate alternative source states. Repeated reports from the same site and reports after confirmed revocation add no transition. Other undefined transitions are rejected or leave the record unchanged. Retention expiry is specified here but lies outside the verified configuration.}
 \label{tab:transitions}
 \scriptsize
 \begin{tabular}{@{}llllll@{}}
 \toprule
-Current state & Event & Precondition & Next state & Token valid? & Exportable? \\
+Current state & Event & Precondition & Next state & Grant valid? & Exportable? \\
 \midrule
-Absent & query/stage & admitted; no open dispute & \textsc{MonitorOnly} & no & no \\
-\textsc{MonitorOnly} & local commit & local operator; no dispute & Active & yes, new & yes \\
-\textsc{MonitorOnly}/Active & first dispute & valid dispute & Disputed & no & no \\
+Absent & query/stage & admitted; no open dispute & MonitorOnly & no & no \\
+MonitorOnly & local commit & local operator; no dispute & Active & yes, new & yes \\
+MonitorOnly/Active & first dispute & valid dispute & Disputed & no & no \\
 Disputed & second dispute & distinct reporting site & Revoked (Dispute) & no & no \\
-Disputed/Revoked (Dispute) & global restore & authorized restore & \textsc{MonitorOnly} & no & no \\
-Active/\textsc{MonitorOnly} & local revoke & local operator & Revoked (Local) & no & no \\
-Revoked (Local) & local restore & no open dispute & \textsc{MonitorOnly} & no & no \\
+Disputed/Revoked (Dispute) & global restore & authorized restore & MonitorOnly & no & no \\
+Active/MonitorOnly/Disputed/Revoked (Dispute) & local revoke & local operator & Revoked (Local) & no & no \\
+Revoked (Local) & local restore & no open dispute & MonitorOnly & no & no \\
+MonitorOnly & retention expiry & below admission for window $W$; no local decision & Absent & no & no \\
 Revoked (Local) & global restore & --- & Revoked (Local) & no & no \\
 Absent & dispute & --- & Absent & no & no \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-Local revoke is defined only from Active or \textsc{MonitorOnly}, not from Disputed or Revoked (Dispute). Thus an operator cannot add an independent veto during suspension or after dispute-confirmed revocation. This matters because global restore returns dispute-derived records to review but must preserve local vetoes (I3). Local revoke becomes available again in \textsc{MonitorOnly}; local restore cannot release Revoked (Dispute). Extending veto recording to these states and re-verifying the lifecycle remain future work.
+Review candidates are not permanent: a MonitorOnly record with no prior operator action returns to Absent once its evidence has stayed below admission for the retention window~$W$, bounding queue growth without touching any record carrying a local decision. A local veto can be recorded from Active, MonitorOnly, Disputed, or dispute-derived Revoked. It changes only the receiving site's record and survives dispute confirmation and global restoration. Local restore remains blocked while a shared dispute is open. Once the dispute is resolved, local restore returns the record to review; export requires a fresh local commit.
 
 \textbf{Core Invariants (I1--I3).} Under the stated identity assumptions, the lifecycle requires:
 \begin{itemize}
-\item \textbf{(I1) Fresh Local Authorization:} Only an explicit \textsc{operator-commit} by site $s$'s operator can transition a fact to \textsc{Active} and generate a valid authorization token. No sequence $\sigma$ of non-commit events (i.e., $\sigma\in\Sigma_{\text{non-commit}}^*$, any sequence drawn from events other than operator-commit) can enter \textsc{Active}, where $\hat\delta$ extends $\delta$ to sequences:
-\[
-\forall s,f:\quad \hat{\delta}(\text{Absent}, \sigma) \neq \text{Active}, \quad \forall \sigma \in \Sigma_{\text{non-commit}}^*.
-\]
-\item \textbf{(I2) Site Confinement:} Local actions (\textsc{operator-commit}, \textsc{local-revoke}, \textsc{local-restore}) at site $s$ have no side effects on any peer site $s' \neq s$.
-\item \textbf{(I3) Conservative Reversal:} A dispute immediately clears export eligibility and invalidates authorization tokens across all sites. Restoration conservatively returns records to \textsc{MonitorOnly} without regenerating tokens, requiring fresh local re-authorization. Global restoration never overrides an independent local revocation.
+\item \textbf{(I1) Fresh Local Authorization:} Only operator-commit by site $s$'s operator can move fact $f$ into Active and create a valid grant at that site.
+\item \textbf{(I2) Site Confinement:} Local commit, revoke, and restore at site $s$ leave every peer site's records unchanged.
+\item \textbf{(I3) Conservative Reversal:} A dispute invalidates grants and export eligibility at reachable sites during fan-out and at other sites upon reconciliation. Restoration requires fresh local approval and preserves independent local revocations, including those recorded at sites that missed the entire dispute/restore episode. No timing bound is imposed on reconciliation.
 \end{itemize}
 
-\textbf{Registry safety and gateway application.} Let $\mathrm{Exported}(s,f,t)$ denote an export event at time $t$. We call $\mathrm{CurrentLocalAuthorization}(s,f,t)$ true when the record is \textsc{Active}, its approval was created by a local commit, and that approval has not been invalidated. The registry must satisfy
-\begin{equation}
-\begin{split}
-\mathrm{Exported}(s,f,t)\ \Rightarrow\\
-\mathrm{CurrentLocalAuthorization}(s,f,t).
-\end{split}
-\label{eq:export-authority}
-\end{equation}
-The finite model checks this property together with I1--I3.
+\textbf{Export control.} Equation~\ref{eq:exportable} gates export on current local authorization, and verification checks that commit, dispute, restore, and reconciliation maintain it across their interleavings. The mutations in Table~\ref{tab:tla} isolate failures of grant coherence, site confinement, veto preservation, and export control. Gateway application follows export, so an unreachable gateway can retain an older policy until reconnection.
 
-The testbed checks rule creation and removal after gateway policy application, not instantaneous synchronization. An unreachable gateway may retain an older rule after registry invalidation. Conversely, an admission error can add an unsuitable review candidate without authorizing any rule.
-
-\subsection{Candidate Admission}
+\subsection{Candidate-Selection Policy}
 \label{sec:scoring}
-Admission controls proposal volume, not authorization. A fact reaches review only if it passes endpoint-class eligibility, reporter quorum, score, and dispute checks (Eq.~\ref{eq:admitauto}); Table~\ref{tab:symbols} gives the operating values.
+The prototype uses automatic admission to limit the proposals presented for local review. We define the admission rule, its score, and the component checks below. Table~\ref{tab:symbols} lists the parameters. The alternative selection policies evaluated in Section~\ref{sec:eval} change the review queue while retaining the same local approval and recovery rules.
 
 \begin{table}[t]
 \centering
-\caption{Admission notation and defaults. Sec.~\ref{sec:sensitivity-results} varies $m$, $\theta$, and $\alpha$; Sec.~\ref{sec:security-results} varies the realized $f_s$.}
+\caption{Admission notation and operating values ($d$: device type; $e$: endpoint).}
 \label{tab:symbols}
 \scriptsize
 \begin{tabular}{@{}p{1.3cm}p{5.00cm}p{0.75cm}@{}}
 \toprule
 Symbol & Meaning & Value \\
 \midrule
-$d$, $e$ & device type; endpoint (direction, protocol, peer, port) & --- \\
-$A(d,e)$ & endpoint-class eligibility (the class gate) & --- \\
-$ES_d$ & sites with at least one observation of device type $d$ & --- \\
-$S_{d,e}$ & subset of $ES_d$ that reports endpoint $(d,e)$ & --- \\
-$C_s$ & cross-site breadth, $|S_{d,e}|/|ES_d|$ & --- \\
-$C_t$ & temporal-persistence confidence (Eq.~\ref{eq:ct}) & --- \\
-$D_{d,e}$, $D_d$ & UTC dates observing $(d,e)$; dates observing any endpoint of $d$ & --- \\
-$n_{d,e}$, $n_d$ & pooled observation counts for $(d,e)$; for all of $d$ & --- \\
-$score(d,e)$ & admission score, $\alpha C_s+\beta C_t$ (Eq.~\ref{eq:score}) & --- \\
-$C_s^{trust}$ & trust-weighted breadth (Eq.~\ref{eq:trustweight}) & --- \\
-$w_i$, $b_i$, $b_{ref}$ & site $i$'s trust weight; distinct fact breadth; reference breadth & --- \\
+$ES_d$ & sites with $\ge1$ observation of device type $d$ & --- \\
+$S_{d,e}$ & subset of $ES_d$ reporting endpoint $(d,e)$ & --- \\
+$C_s$, $C_t$ & cross-site breadth; temporal confidence & --- \\
 $m$ & minimum reporting sites (quorum) & 2 \\
 $\theta$ & admission threshold & 0.65 \\
 $\alpha,\beta$ & breadth / temporal weight, $\alpha+\beta=1$ & 0.6, 0.4 \\
@@ -233,23 +291,7 @@ $f_s$ & assumed adversarial breadth share & 0.30 \\
 \end{tabular}
 \end{table}
 
-\textbf{Eligibility.} After address filtering, $A(d,e)=1$ for DNS, NTP, update, or vendor-cloud endpoints: DNS is \texttt{dns} or port 53, NTP is \texttt{ntp} or port 123, update names contain \texttt{update}/\texttt{upgrade}/\texttt{firmware}/\texttt{ota}/\texttt{fw.}/\texttt{-fw}/\texttt{swupdate}, and vendor-cloud is any remaining FQDN; private, reserved, and link-local IP literals fail. We call this the \emph{class gate}: a resolvability/control-plane filter, not an intent classifier, so a resolved attacker domain still clears it (Sec.~\ref{sec:security-results}).
-
-Breadth is the fraction of sites observing device type $d$ that report this endpoint: $C_s=|S_{d,e}|/|ES_d|$, where $ES_d$ contains every site with at least one observation of $d$ and $S_{d,e}$ those reporting $(d,e)$ specifically (a site need not report this endpoint to enter the denominator) --- a site-population definition distinct from the endpoint-class gate $A(d,e)$.
-Let $D_{d,e}$ be the union of UTC calendar dates of observations of $(d,e)$ across sites, $D_d$ the corresponding union for all observations of $d$, and $n_{d,e}$, $n_d$ their pooled observation counts. Temporal confidence, combining day coverage and frequency, is
-\begin{equation}
-C_t=0.7\frac{|D_{d,e}|}{|D_d|}+0.3\frac{n_{d,e}}{n_d}\in[0,1].
-\label{eq:ct}
-\end{equation}
-
-\textbf{Admission score.} Nonnegative weights $\alpha$ and $\beta$ determine the contributions of breadth and persistence, respectively. The score is
-\begin{equation}
-score(d,e)=\alpha C_s(d,e)+\beta C_t(d,e),
-\qquad \alpha+\beta=1 .
-\label{eq:score}
-\end{equation}
-
-\textbf{Combined rule.} Let $\theta$ be the minimum score and $openDispute(d,e)$ indicate an unresolved dispute. We require at least two distinct reporting sites ($m=2$, the quorum); a larger quorum requires more reports and can delay admission, since authenticated identities alone do not establish independent behavior. Automatic admission to review is
+\textbf{Combined rule.} Automatic staging requires endpoint eligibility, at least $m$ reporting sites, score at least $\theta$, and no unresolved dispute. We use $m=2$ to exclude single-site reports without a larger quorum's admission cost; distinct identities do not guarantee independent observations:
 \begin{equation}
 \begin{aligned}
 \mathrm{admit}_{auto}(d,e)
@@ -259,11 +301,25 @@ score(d,e)=\alpha C_s(d,e)+\beta C_t(d,e),
 \end{aligned}
 \label{eq:admitauto}
 \end{equation}
-Registry queries block disputed/revoked facts; \textsc{operator-commit} remains necessary for Active.
+Passing permits staging, not export, and does not override existing local decisions (Sec.~\ref{subsec:endpoint-facts}).
 
-We select weights from an external adversarial-breadth bound and threshold, then measure utility: raw-breadth parameters are $(\alpha,\beta)=(0.6,0.4)$, $\theta=0.65$, and $m=2$. Sec.~\ref{sec:sensitivity-results} reports the empirical cost.
+\textbf{Admission score.} With nonnegative weights $\alpha,\beta$ for breadth and temporal confidence,
+\begin{equation}
+score(d,e)=\alpha C_s(d,e)+\beta C_t(d,e),
+\qquad \alpha+\beta=1 .
+\label{eq:score}
+\end{equation}
 
-\textbf{Parameter selection.} The weights are not tuned on the corpus. We fix them from the external breadth bound, so admission arithmetic decides $\alpha$ before any dataset is seen.
+\textbf{Eligibility.} The endpoint filter sets $A(d,e)=1$ for DNS, NTP, update, or vendor-cloud communications, using port, protocol, and name-substring rules. Vendor-cloud includes any remaining FQDN, while private, reserved, and link-local IP literals are excluded. The filter selects endpoint formats and service categories, so resolved attacker domains can also qualify.
+
+\textbf{Breadth and persistence.} Breadth $C_s=|S_{d,e}|/|ES_d|$ measures the fraction of sites observing device type $d$ that report endpoint $e$. Let $D_{d,e}$ contain the UTC observation dates of $(d,e)$ across sites, and $D_d$ the dates of all observations of $d$. With pooled observation counts $n_{d,e}$ and $n_d$, temporal confidence, used here as a measure of persistence, combines day coverage and relative frequency:
+\begin{equation}
+C_t=0.7\frac{|D_{d,e}|}{|D_d|}+0.3\frac{n_{d,e}}{n_d}\in[0,1].
+\label{eq:ct}
+\end{equation}
+The 0.7/0.3 split weights day coverage above pooled volume, reducing the influence of high traffic volume from a single reporter. Because $n_{d,e}/n_d$ is structurally small for device types with many endpoints, $C_t$ is in practice dominated by day coverage. We hold this split fixed and sweep only $\theta$ and $\alpha$ (Sec.~\ref{sec:sensitivity-results}).
+
+We choose weights that reject facts reported exclusively by a bounded malicious minority, then measure the resulting coverage.
 
 \begin{criterion}[Admission design constraint]
 \label{crit:poison-bound}
@@ -276,175 +332,133 @@ score(d,e)\le\alpha f_s+\beta
 Requiring this upper bound to fall strictly below $\theta$ constrains the parameters to $\alpha>(1-\theta)/(1-f_s)$, equivalently $f_s<1-(1-\theta)/\alpha$.
 \end{criterion}
 
-The constraint is what selects the operating point. At $\theta=0.65$ and $f_s=0.30$ it admits no $\alpha\le0.5$: a design weighting persistence at least as heavily as breadth could be carried past $\theta$ by fabrication volume alone. We take $\alpha=0.6$, which bounds an adversary-only score at 0.58 and tolerates breadth shares below about 0.42; Sec.~\ref{sec:sensitivity-results} prices this choice against the corpus optimum. The constraint is an arithmetic property of Eq.~\ref{eq:score}, not a security theorem: it inherits whatever bound the deployment governs $f_s$ by, applies to raw breadth $C_s$ only, and says nothing about contributors who accumulate genuine breadth. The bounded-A2 sweep and the port-masquerading counterfactual therefore use raw $C_s$; Sec.~\ref{sec:sybil-results} evaluates the trust-weighted and clustered variants empirically, and the temporal split within $\beta$ is heuristic.
+At $\theta=0.65$ and $f_s=0.30$ this requires $\alpha>0.5$. Choosing $\alpha=0.6$ gives an upper bound of 0.58 and rejects adversary-only evidence for raw-breadth shares below $5/12$. Sec.~\ref{sec:sensitivity-results} evaluates coverage at alternative parameters.
 
-\textbf{Sybil-aware variants.} Trust weighting replaces raw breadth with
-\begin{equation}
-C_s^{trust}=\frac{\sum_{i\in S_{d,e}}w_i}{\sum_{i\in ES_d}w_i},
-\qquad w_i=\min(1,b_i/b_{ref}),
-\label{eq:trustweight}
-\end{equation}
-where $b_i=|\{(d,e):i\text{ contributed }(d,e)\}|$ is site $i$'s distinct fact breadth across device types and $b_{ref}$ is the median of these breadths in a frozen clean snapshot built before injection. $b_i$ is recomputed on the population currently being scored, so every site---including a newly appearing identity---is weighted by its own present breadth, and padding raises $b_i$ directly; only $b_{ref}$ is frozen. This differs from the Reputation-Weighted Voting (RWV) reference point (Sec.~\ref{sec:impl}), which instead fixes weights once on the pre-attack population, giving an absent identity a flat probation weight regardless of later behavior.
+\textbf{Sybil-aware variants.} Raw breadth counts identities, so fabricated ones inflate it. Trust weighting replaces $C_s$ with
+\[
+C_s^{trust}=\frac{\sum_{i\in S_{d,e}}w_i}{\sum_{i\in ES_d}w_i},\qquad w_i=\min(1,b_i/b_{ref}),
+\]
+Here, $b_i$ counts site $i$'s distinct contributed facts across device types, and $b_{ref}$ is their median in a frozen clean snapshot. Only $b_{ref}$ is frozen, so current $b_i$ includes new identities and padding. Clustering instead joins sites at Jaccard endpoint-set similarity $\ge0.8$ and computes breadth over the connected components. The registry and independent-deployment experiments use raw breadth, to which Criterion~\ref{crit:poison-bound} applies. Sec.~\ref{sec:sensitivity-results} compares all three under identity inflation. These variants rely on a clean reference or informative endpoint diversity and fall outside the raw-breadth bound.
 
-Clustering groups sites with similar endpoint sets: for each device type, sites are graph vertices, an edge joins sets with Jaccard similarity (intersection over union) at least 0.8, and each connected component counts as one source. Writing $c(i)$ for site $i$'s component, clustered breadth is $|\{c(i):i\in S_{d,e}\}|/|\{c(i):i\in ES_d\}|$.
-
-The registry and independent-deployment experiments use raw breadth. The UNSW retention funnel uses trust weighting; the identity-inflation experiment compares raw, weighted, and clustered variants. Weighting and clustering do not inherit Criterion~\ref{crit:poison-bound}'s guarantee and depend on a clean reference or meaningful endpoint diversity.
-
-\textbf{Limitations.} Days are unioned while counts are pooled, so busy sites affect frequency. Fleet changes can also rescore unrelated facts (Sec.~\ref{sec:drift-results}).
-
-\section{Implementation and Method}
+\section{Implementation and Evaluation Method}
 \label{sec:impl}
-The conceptual baseline is pooled union plus local approval, without the lifecycle semantics of Sec.~\ref{sec:related-work}.
+The distributed prototype separates shared evidence from site-local decisions into distinct services (Sec.~\ref{sec:scalability-results}). Registry transactions apply per-fact dispute/restore changes atomically, with up to ten retries for conflicting writes. The implementation uses Python and FastAPI, with SQLAlchemy~2 and SQLite for persistence.
 
-The single-node Python registry (FastAPI, SQLAlchemy~2, SQLite) separates evidence/admission from local authority, flags, and history. Transactions atomically fan out dispute/restore for one fact; conflicting writes retry up to ten times. The API recomputes admission from stored observations and exports currently authorized facts as MUD; gateway fetch/reload remain separate. Distribution requires coordination of these transitions (Sec.~\ref{sec:scalability-results}).
+To test whether lifecycle changes reach gateway enforcement, we run unmodified osMUD commit \texttt{852918e} in a privileged Docker container with the OpenWrt 23.05.5 root filesystem. Restarting osMUD after each policy change applies MUD ACLs as nftables rules. We record ACEs, effective rules, registry/osMUD state, and a live TCP probe for each transition. Exports are unsigned and signature validation is disabled.
 
-\textbf{Datasets.} We use UNSW-IoTraffic~\cite{sivanathan2019classifying}, Mon(IoT)r~\cite{moniotr}, and YourThings~\cite{alrawi2019yourthings}; Sec.~\ref{sec:loo-results} uses the latter as a third independent deployment. UNSW supplies 27 device types and 28 traffic-derived reference profiles; its one physical capture is shuffled round-robin into ten seeded pseudo-sites (seed 42 unless stated). Collapsing Mon(IoT)r VPN variants yields independent US and UK captures, with 3,484,201 of 4,166,133 records surviving address filtering. Adapters require the five endpoint fields: UNSW uses same-site Host/SNI evidence for 24-hour IP-to-name correlation, Mon(IoT)r uses cumulative DNS, and we retain device-initiated transport flows with a port and global peer or public name. The serializer emits RFC~8520's resolved-name TCP/UDP subset, not RFC~9761 TLS/DTLS extensions~\cite{rfc9761}; 0.9\% of reference ACEs (0.6\% macro) are unrepresentable. Adapters and manifests are in the artifact.
+Candidate-selection experiments use three traffic datasets. UNSW-IoTraffic~\cite{sivanathan2019classifying} supplies 27 device types and 28 traffic-derived reference profiles; its single capture is shuffled and partitioned round-robin into ten pseudo-sites (seed 42 unless stated). Mon(IoT)r~\cite{moniotr} provides US and UK captures after collapsing VPN variants; YourThings~\cite{alrawi2019yourthings} adds a third deployment for cross-lab comparisons (Sec.~\ref{sec:loo-results}). We retain device-initiated flows with a port and global peer or public name. UNSW associates IPs with same-site HTTP Host and TLS Server Name Indication (SNI) within 24 hours; Mon(IoT)r uses cumulative DNS.
 
-\textbf{Reference points.} \emph{Local-only} uses receiver facts; \emph{pooled union} stages every fact. Its approval variant leaves Active records unchanged when evidence changes; a simple revoke permits withdrawal but specifies neither dispute fan-out nor restoration. DIB defines these semantics; this lifecycle comparison is not separately benchmarked. The admission ablation starts with \emph{quorum-only} (two reporters), then adds scoring and class eligibility. \emph{Frequency filtering} requires $n_{d,e}\ge2$; the \emph{50\% registry}, $|S_{d,e}|/|ES_d|\ge.5$; and \emph{RWV}, weighted support $>0.65$. RWV freezes pre-attack weights and assigns new identities 0.1, scaling with raw Sybil count unlike DIB's dynamic weighting.
+Using these observations, we assess sharing by comparing receiver-only evidence (\emph{local-only}) with all pooled facts (\emph{pooled union}). Successively adding a two-reporter quorum, the score threshold, and endpoint eligibility isolates filtering effects, while \emph{ranked union} selects the highest-scoring pooled facts at matched review budgets.
 
-\textbf{Ground truth and randomization.} Predictions match device, direction, normalized protocol, peer, and port; port 0, unknown protocol, and CIDR ranges are handled as wildcards or membership. Micro metrics pool true/false positives/negatives; macro metrics average over the 28 UNSW reference profiles. Independent-deployment precision/recall/F1 measure agreement with the receiving site's observed traffic, not a manufacturer policy. Aggregates use seeds 0--19; A1, Sybil, and drift use seed 42, and cross-lab, OpenWrt, and concurrency use seed 0.
+We then test robustness with captured and synthetic inputs. The A1 replay injects 165 malicious observations forming 59 endpoint facts at $k=1,\ldots,10$ pseudo-sites, using \emph{frequency filtering} ($n_{d,e}\ge2$ pooled observations) as a baseline. Further tests inject fabrications, resolved-name and port masquerading, Sybil identities (200--3,200 over 20--400 days), and synthetic rollouts, with fabricated endpoint sets diversified by 0/10/25/50\% of a baseline pool. For identity inflation, \emph{reputation-weighted voting (RWV)} provides a comparison requiring weighted support above 0.65, with frozen pre-attack weights and weight 0.1 for unseen identities.
 
-\textbf{Enforcement testbed.} A privileged Docker container with the OpenWrt 23.05.5 root filesystem runs unmodified osMUD commit \texttt{852918e}, restarted per policy change to materialize MUD ACLs as nftables rules. Each transition records ACEs, effective rules, registry/osMUD state, and a live TCP probe. Unsigned experimental exports require disabling signature validation; production requires signed MUD and PKI.
+To measure agreement with reference behavior, we match predictions on device, direction, normalized protocol, peer, and port, treating port 0 and unknown protocol as wildcards and CIDR ranges by membership. Micro metrics pool true/false positives and negatives; UNSW macro metrics average over its 28 reference profiles. Aggregates use seeds 0--19, A1/Sybil/drift use seed 42, and cross-lab, OpenWrt, and concurrency use seed 0.
 
-\textbf{Captured and synthetic events.} A1 replays 165 captured malicious observations forming 59 facts to $k$ pseudo-sites. Other tests inject fabrications, resolved-name and port masquerading, Sybil identities (200--3,200; 20--400 days), and rollouts, with endpoint sets diversified by 0/10/25/50\% of a baseline pool; artifact configurations give full sampling details.
-
-\textbf{Artifact availability.} Configurations, input hashes, generated MUD, gateway states/probes, TLA+ specifications/logs, matched ablations, and corrected-registry regression evidence are provided to reviewers at submission under a permissive licence at
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO !!! REPLACE PLACEHOLDER ANONYMOUS ARTIFACT LINK BEFORE SUBMISSION !!!
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\url{ANONYMOUS-ARTIFACT-LINK-TBD}, with a permanent DOI to be minted on acceptance.
+For reproducibility, the anonymized repository supplied with the submission contains configurations, input hashes, adapters, sampling details, generated MUD files, gateway states and probes, TLA+ specifications and logs, matched ablations, parameter and identity-inflation grids, and regression evidence. This pre-submission package is not an archived public release; a permanent DOI will be minted for the accepted artifact.
 
 \section{Evaluation}
 \label{sec:eval}
 
-We evaluate lifecycle safety (RQ1), proposal-volume/coverage trade-offs (RQ2), and adversarial admission (RQ3). RQ1 distinguishes finite-model verification from registry, gateway, and reconciliation tests. RQ2 separates UNSW reference-profile coverage from independent-deployment traffic agreement; candidate counts quantify proposal volume, and Sec.~\ref{sec:loo-results} converts them into review cost per confirmed endpoint; operator time itself is not measured. Precision/recall/F1 do not establish benignity or functional necessity. RQ3 distinguishes the conditional analytical bound from empirical mitigation; it tests admission, not approval.
+The experiments assess whether DIB preserves local authorization during shared withdrawal and recovery. Model checks and ablations examine the guards; gateway and outage tests demonstrate enforcement and reconciliation. We then measure management performance and candidate-selection effects on proposal volume and traffic agreement. The candidate counts quantify review volume; operator time and decision quality remain to be evaluated.
 
-\subsection{RQ1: Authorization Safety (G1, G4)}
+\subsection{Authorization and Recovery}
 \label{sec:lifecycle-results}
-Under Sec.~\ref{subsec:trust}'s identity assumptions, RQ1 checks authorization creation and withdrawal. Table~\ref{tab:comparison} places local revoke before dispute because it is permitted only from \textsc{MonitorOnly} or Active. Restoration must preserve this veto while returning dispute-derived peer records to review.
+We first check whether lifecycle transitions preserve local authorization, then test the corresponding behavior in the registry and at the gateway. The TLA+ model represents three sites and two facts, distinguishing the dispute opener, confirmer, and bystander. Exhaustive exploration of 4,311,852 reachable states finds no violation of I1--I3 or the export checks: only local commits create fresh authorization, export requires it, and disputes invalidate it without affecting unrelated facts. The model checks site confinement (I2) for the single-registry implementation; in the distributed prototype, each site owns its store.
 
-\textbf{Why the guards matter.} Mutations expose three distinct failures: restoration regenerating tokens breaks authorization coherence; local restore during a dispute escapes suspension; resetting all revoked records erases local vetoes without necessarily creating permission. Preventing unauthorized activation alone does not preserve revocation semantics.
+A distributed model adds disconnection at one of three sites, with one fact and local revoke and restore enabled while the site is unreachable. It explores 48,960 distinct states to depth 18 without violations. Both checks are exhaustive only within their finite configurations; they do not cover gateway timing, authentication, or distributed linearizability.
 
-\textbf{Finite-model verification.} The TLA+ model explores arbitrary interleavings of lifecycle actions, multi-site disputes, and token invalidations across three sites and two endpoint facts. All 3,837,084 reachable states satisfy I1--I3 and export eligibility; every new authorization requires a local commit, including after restoration. Guard-removal mutations produce counterexamples (Table~\ref{tab:tla}). Gateway enforcement and distributed linearizability are outside the model. An extension adds site reachability, a per-fact pending flag, and explicit reconciliation for the deployment in Sec.~\ref{sec:scalability-results}. Its dispute-suspension and conservative-restore properties apply to reachable, reconciled sites (718,571 states generated, 44,610 distinct, depth 18, no counterexample), not disconnected or unreconciled sites.
+To identify which safeguards prevent failures, we remove six lifecycle guards in separate model variants, labeled M1--M6. Each produces a distinct authorization failure involving grant handling, site confinement, revocation origin, or export control (Table~\ref{tab:tla}).
 
 \begin{table}[t]
 \centering
-\caption{Finite lifecycle/export checks over 3,837,084 reachable states, with authorization validity, revocation provenance, and every action exercised, including \textsc{local-revoke}/\textsc{local-restore}. Removing \textsc{operator-commit} leaves 1,749,604 reachable states, none Active. Gateway state is excluded.}
+\caption{Guard-removal mutations M1--M6 and their counterexamples. A separate control with operator-commit disabled leaves 2,076,196 reachable states, none Active.}
 \label{tab:tla}
 \scriptsize
-\begin{tabular}{@{}p{2.15cm}p{0.75cm}p{1.55cm}p{1.85cm}@{}}
+\begin{tabular}{@{}p{0.35cm}p{2.05cm}p{1.85cm}p{1.95cm}@{}}
 \toprule
-Property & Result & Mutation & Counterexample \\
+ID & Property & Guard removed & Counterexample \\
 \midrule
-Fresh auth only local commit & holds & --- & --- \\
-Authorization-token coherence & holds & restore recreates token & authorization without commit \\
-Export requires fresh authorization & holds & --- & --- \\
-I2 site confinement & holds & cross-site commit & remote commit alters $s'$ \\
-I2 local-revoke confinement & holds & local-revoke fans out & remote site's record changes \\
-I3 dispute invalidates authorization & holds & --- & --- \\
-I3 global restore preserves local revoke & holds & restore ignores revocation origin & local veto erased \\
-I3 local-restore conservative & holds & local-restore ignores open dispute & site escapes live dispute episode \\
-Export requires Active & holds & disputed export & ACE emitted while Disputed \\
-Dispute suspends everywhere; fact isolation (no other fact key changes) & holds & --- & --- \\
-Active unreachable without commit & holds & --- & --- \\
+M1 & Grant coherence & restore recreates grant & authorization without commit \\
+M2 & I2 site confinement & cross-site commit & remote commit alters $s'$ \\
+M3 & I2 local-revoke confinement & local-revoke fans out & remote site's record changes \\
+M4 & I3 global restore preserves local revoke & restore ignores revocation origin & local veto erased \\
+M5 & I3 local-restore conservative & local-restore ignores open dispute & site escapes live dispute \\
+M6 & Export requires Active & disputed export & ACE emitted while Disputed \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Registry regression.} Replaying local revoke, two peer disputes, and global restore exposed a mismatch: the prototype reset both locally and globally revoked records to review. The correction checks revocation origin in the audit history. Regression tests cover one- and two-dispute episodes and repeated restoration; a service trace confirms that the local veto survives while the peer record returns to review. This correction is validated at the registry, not by a new gateway run.
+The registry tests exercise these rules through one- and two-dispute episodes, repeated restoration, and local vetoes recorded before or during withdrawal. Across these tests, the registry preserves local vetoes, blocks local restore during an open dispute, and requires a fresh commit after restoration.
 
-\textbf{Gateway result.} On OpenWrt, unmodified osMUD consumes regenerated ACLs and yields:
-\begin{itemize}
-\item \textsc{MonitorOnly} exports no ACE or firewall rule;
-\item a local commit exports the fact, permitting one tested FQDN on TCP/8080 and UDP/5353;
-\item the first dispute reduces the export to zero ACEs, removes the effective nftables rules, and causes the probe to be refused;
-\item a second-site dispute records Revoked with no further data-plane change;
-\item restore returns the fact to \textsc{MonitorOnly}; a fresh local commit restores access; and
-\item \textsc{local-revoke} at the local gateway site (Site~$s$) removes both effective nftables rules after policy application and rejects the probe; \textsc{local-restore} returns the fact to \textsc{MonitorOnly}.
-\end{itemize}
-All 10 repeat runs completed. Seven reversal cycles affected only the named fact, and distinct-site attestations were idempotent. The local-revoke/local-restore extension collapsed the firewall to one reject-all rule and retained it through restoration. Driving the same gateway through the distributed deployment (Section~\ref{sec:scalability-results}) instead of the in-process registry reproduces the same live nftables outcome for every transition.
+\begin{table}[t]
+\centering
+\caption{Restoration-policy ablation: six sequences per policy, three sites, two facts, counted after restore/reconciliation and before fresh commits. Alternatives are controlled adapters over the same implementation.}
+\label{tab:comparison}
+\scriptsize
+\begin{tabular}{@{}p{3.0cm}p{1.9cm}p{1.9cm}@{}}
+\toprule
+Restoration rule & Subject ACEs without new commit & Local vetoes preserved \\
+\midrule
+Reuse approval; preserve veto & 12/18 & 6/6 \\
+Reset every record to review & 0/18 & 0/6 \\
+Provenance-aware review (DIB) & 0/18 & 6/6 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{RQ2: How Much Observable Behavior Is Retained?}
+To isolate the effect of restoration policy, three sites approve a test fact and an unrelated control fact. Six event sequences place a local veto before a dispute, during suspension, or after confirmation, with all updates delivered or another site missing the episode. Reusing approvals exports the test fact at both non-vetoing sites after every sequence. Resetting all records to review prevents export but erases all six vetoes. Among the three policies, only DIB prevents export of the test fact while preserving every veto (Table~\ref{tab:comparison}). All three policies preserve the control fact and ignore stale replay, isolating the difference to restoration handling.
+
+Evidence updates are tested separately from lifecycle events (G4). With the same fact in Active, MonitorOnly, and locally Revoked states at three respective sites, repeated score changes leave decision states, authority records, and MUD export unchanged. Only Active records receive a review flag, with the change recorded in the audit history. This result comes from registry tests, since the finite model represents admission only as a Boolean.
+
+Finally, all ten gateway cases show that osMUD applies the exported policies as expected. MonitorOnly produces no rule; a local commit permits the tested FQDN on TCP/8080 and UDP/5353. The first dispute removes both nftables rules and the live TCP probe is refused; a second dispute report confirms revocation. Global restore returns the record to review, and access resumes only after a fresh commit. Local revoke also removes the rules, while local restore alone leaves access blocked. Seven reversal cycles affect only the named fact, and the distributed services reproduce these transitions.
+
+\subsection{Management-Path Feasibility and Reconciliation}
+\label{sec:scalability-results}
+The registry measurements characterize both typical latency and delays under contention. On a 16-core x86\_64 Linux host running Python 3.10.13, each of 1/10/50/100 writers performs 20 mixed operations after the same warm-up procedure. At 100 writers, throughput reaches $317.5\pm10.8$ operations/s and median latency is $3.8\pm0.2$~ms (mean $\pm$ sample SD over three repetitions), but p99 approaches 5.9~s. Instrumentation attributes this tail to SQLite's single serialized writer rather than lifecycle logic. All 9,660 timed operations complete without unexpected errors.
+
+Separate concurrency checks cover nine correctness scenarios with 200 trials each and a retry-contention scenario with 25 trials and 25 writers. Across these 1,825 trials, the exercised interleavings produce no violations of the idempotency, dispute-exactness, local-revoke-race, site-isolation, or audit-history checks.
+
+The distributed configuration places decisions in ten independent site services while an evidence service holds shared scores and dispute/restore transitions. Each site enforces revocation origin locally. Dispute-open, confirming-dispute, and restore events fan out synchronously, with up to three attempts of 1~s each. Including this fan-out, the ten-site HTTP deployment sustains 530.3 operations/s at 100 writers, with p99 near 455~ms over five repetitions of 2,000 operations and no unexpected errors. All services run in separate processes on the same host.
+
+
+Throughput gains from process separation do not increase monotonically with the number of sites. A controlled sweep varies site containers $N$ while keeping stack, transport, operation mix, and hardware fixed, with $N=1$ as the single-site control. At 100 writers, throughput is 320.9 operations/s for $N=1$ and 557.7, 539.5, and 523.1 operations/s for $N=2$, 5, and 10 (means of five repetitions); the shared evidence service limits further gains. With one writer, fan-out instead reduces throughput from 125.7 to 99.8 operations/s, making ten sites 20.6\% slower than one. Six of 64,400 timed requests fail on pooled client connections (0.0093\%, no server 5xx); the reported counts include these failures and expected HTTP conflicts.
+
+When a site becomes unreachable, the service retains only its latest pending target for each fact rather than every missed update. Reconnection applies that target through the same idempotent path, using a monotonic per-fact sequence number. A restore target therefore invalidates an old Active approval even if the preceding dispute never reached the site. Container stops simulate disconnection; WAN latency, packet loss, and asymmetric partitions remain outside this evaluation.
+
+All 40 outage trials converge after reconnection through one collapsed pending record. Missing one event type---dispute-open, confirming-dispute, or restore---leads to convergence in $0.51\pm0.03$~s over 30 trials. Missing an entire dispute/confirmation/restore episode invalidates the stale approval through the final MonitorOnly target in $0.50\pm0.04$~s over ten trials (mean $\pm$ sample SD). Another 20 trials exercise races with new fan-out events and check that sequence numbers preserve the current target. Process restart ($\sim$0.45~s) accounts for most of the recovery time; reconciliation logic takes less than 0.1~s.
+
+The same mechanism must preserve a local veto while invalidating a stale approval. Ten further trials use three site processes and one evidence process over loopback HTTP with persistent SQLite stores. Each site approves three facts; the target site locally revokes one and is stopped. Dispute/confirmation/restore episodes then complete for that fact and a second, Active fact. On restart, one collapsed restore target per fact preserves the veto and returns the stale Active fact to MonitorOnly in every trial. Neither is exported, while the unrelated fact remains Active and exportable at every site. Repeated reconciliation and replay of stale updates leave the records unchanged; direct commit cannot override the veto, and export of the locally revoked fact resumes only after local restore and a fresh commit.
+
+\subsection{Suspension Policy and Availability}
+\label{sec:suspension-policy}
+With immediate suspension, 100 requests from one member withdraw 100 facts in 11.3~s across ten sites. This invalidates 1,000 authorizations and takes exports from 100 ACEs to zero per site, while concurrent read throughput remains at 85\% of its initial value (432.3 to 366.0 operations/s; p99 30.6 to 39.0~ms). Recovery costs 11 requests per fact and 21.6~s: policy withdrawal disrupts access even though the service continues to process requests.
+
+A deterministic API campaign compares suspension after one or two distinct reporters, with 100 approved facts per site. Under two-reporter suspension the first report is retained and the second opens the dispute: one reporter removes all 100 ACEs per site under immediate suspension and none under two-reporter suspension, while a second removes them under both. Duplicate reports add no votes, restoration clears report history, and in each configuration the 100 local vetoes recorded during withdrawal survive restoration with fresh commits required for export. Other experiments and the formal models use immediate suspension.
+
+\subsection{Candidate Selection on Captured Traffic}
 \label{sec:utility-results}
-Let $A$ be staged reference-matching behavior, $O$ the address-filtered observable reference behavior, and $R$ the complete reference. \emph{Retention} is $A/O$; \emph{complete-profile recall} is $A/R$, over 564 ACEs in 28 UNSW profiles (macro values count unobserved \texttt{chromecast-ultra} as zero). Table~\ref{tab:recall-properties} reports independent properties; Table~\ref{tab:recall-funnel} reports cumulative coverage.
+The captured-traffic experiments measure both coverage of observed behavior and the number of candidates presented for review.
 
-\begin{table}[t]
-\centering
-\caption{Independent properties of 564 ACEs in 28 reference profiles, each relative to the full base; not successive filters.}
-\label{tab:recall-properties}
-\scriptsize
-\begin{tabular}{@{}lrr@{}}
-\toprule
-Independent property & Micro & Macro \\
-\midrule
-All reference ACEs (base) & 100.0\% & 100.0\% \\
-Under \texttt{from-device-policy} & 89.2\% & 83.4\% \\
-Class eligible for staging & 99.1\% & 99.4\% \\
-\bottomrule
-\end{tabular}
-\end{table}
+In UNSW, only 55 of the 564 reference ACEs across 28 profiles remain observable after address filtering; 61 to-device entries cannot appear in device-initiated input. DIB stages 36 of the observable ACEs, retaining 65.5\% of observable behavior but only 6.4\% of the complete reference. Macro recall is 0.079, compared with 0.124 for observable behavior. Pooling still helps at cold start: after 30 days, pooling ten pseudo-sites yields a macro agreement F1 of $0.112\pm0.002$, against $0.022\pm0.005$ for local-only monitoring of one pseudo-site (G2).
 
-\begin{table}[t]
-\centering
-\caption{Cumulative coverage over the same 564 reference ACEs (ten pseudo-sites, trust-weighted admission). Rows are nested subsets; percentages use the full reference base.}
-\label{tab:recall-funnel}
-\scriptsize
-\begin{tabular}{@{}lrr@{}}
-\toprule
-Cumulative pipeline stage & Micro (cum.) & Macro (cum.) \\
-\midrule
-All reference ACEs (base) & 100.0\% & 100.0\% \\
-Observed and address-filtered & 9.8\% & 12.4\% \\
-Staged by DIB & 6.4\% & 7.9\% \\
-\bottomrule
-\end{tabular}
-\end{table}
+This gain reflects a larger sample, not agreement across independent networks. The pseudo-sites are round-robin shards of one capture and share device instances, firmware, and a DNS/CDN view. Every quorum $m\in\{2,\ldots,10\}$ admits the same 346 facts because of that partition. This experiment uses trust weighting; the independent-deployment comparisons that follow use raw breadth.
 
-After address filtering, the traces expose 55 of 564 reference ACEs (macro recall 0.124). DIB stages 36 of 564 (macro recall 0.079), retaining 63.2\% of the observable macro behavior, computed from unrounded macro values.
-
-Across the regenerated 20-seed graph-free ablation, the full rule accepts $344.55\pm5.03$ facts with macro agreement F1 $0.104\pm0.001$. Independent-deployment cold-start transfer is evaluated separately (Sec.~\ref{sec:loo-results}).
-
-\textbf{Comparison with local-only monitoring.} On pseudo-sites from one UNSW capture, local-only monitoring reaches macro F1 $0.022\pm0.005$ after 30 days; DIB's day-0 cross-site candidates reach $0.112\pm0.002$ without local history, about 5.1$\times$ on the ratio of means. Adding 30 days of local observation raises DIB only to $0.114\pm0.002$: cross-site seeding accounts for nearly all the gain in this partition, not evidence of cross-organization transfer.
-
-Most coverage loss precedes admission: device-initiated capture makes 61 to-device ACEs unreachable, and address filtering reduces 93 observed ACEs to 55. Class eligibility and direction are independent properties, explaining their different shares (Table~\ref{tab:recall-properties}).
-
-\subsection{RQ2: How Many Candidates Require Review?}
+\subsubsection{Candidate Review Volume}
 \label{sec:workload-results}
-The independent Mon(IoT)r US and UK deployments isolate each filter's effect on proposal volume. Collapsing VPN variants leaves 26 shared device types with mean endpoint-fact overlap 0.25; three types share no facts. Both deployments contribute evidence to this full-capture comparison (Table~\ref{tab:workload}), unlike the held-out-receiver test below.
+The independent Mon(IoT)r US and UK captures reveal how successive filters reduce proposal volume. After collapsing VPN variants, they share 26 device types with mean endpoint-fact overlap 0.25; three types share no facts. Both deployments contribute evidence in this experiment, unlike the held-out-receiver comparison that follows.
 
-\begin{table}[t]
-\centering
-\caption{Two-lab full-capture queue: $Q$=quorum, $S$=score, $C$=class gate. Filters share pooled two-site evidence; only union baselines and reductions depend on receiver device scope.}
-\label{tab:workload}
-\scriptsize
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-Stage / site & Candidates & Union & Red.\ vs union \\
-\midrule
-\multicolumn{4}{@{}l}{\emph{Site-independent (pooled two-site evidence)}} \\
-\quad Full DIB ($QSC$) & 462 & --- & --- \\
-\quad DIB without class gate ($QS$) & 697 & --- & --- \\
-\quad Quorum only ($Q$) & 840 & --- & --- \\
-\midrule
-\multicolumn{4}{@{}l}{\emph{Site-specific union baseline}} \\
-\quad US & --- & 24,121 & 98.1\% \\
-\quad UK & --- & 6,707 & 93.1\% \\
-\bottomrule
-\end{tabular}
-\end{table}
+Of 24,886 distinct pooled facts, 24,046 occur at only one site and 840 at both, so the two-site quorum produces the largest reduction. The score threshold narrows the queue to 697 facts and endpoint eligibility to 462 (452 serializable): 98.1\% fewer than pooling, 45.0\% fewer than quorum alone, and 33.7\% fewer than quorum with scoring. Across 32 daily windows, arrivals average 15.9 additions per site-day and peak at 432. These filters govern proposals only; Active facts that later fail admission remain authorized and receive a review flag.
 
-Quorum reduces the queue to 840, scoring to 697, and the class gate to 462 (452 serializable): 45.0\% below quorum-only and 33.7\% below no class gate. Union-relative reductions are 98.1\% (US) and 93.1\% (UK). Across 32 daily windows, arrivals remain bursty (15.9 additions per site-day; peak 432); Active facts that later fail admission are flagged, not removed.
-
-\subsection{RQ2: Proposals for a New Receiving Site}
+\subsubsection{Proposals for a New Receiving Site}
 \label{sec:loo-results}
 
-To evaluate a new receiver, we exclude it from reporter sets, eligible populations, days, and observation counts. With only US and UK, holding one out leaves one source and cannot satisfy $m=2$, so we add YourThings (YT)~\cite{alrawi2019yourthings}, an independent historical deployment comprising one day and 40 packet captures. A fixed six-entry label mapping aligns the six device types observed in all three deployments.
+A new receiving site presents a different constraint: its observations must not help select its own proposals. We exclude the receiver from reporter sets, eligible populations, days, and observation counts. Holding out either US or UK from this two-deployment comparison leaves only one source, which cannot satisfy $m=2$. YourThings (YT)~\cite{alrawi2019yourthings}, an independent historical deployment with one day and 40 packet captures, supplies the third deployment. A fixed six-entry label mapping aligns the device types present in all three.
 
-\textbf{Matched comparison.} Every filter uses the same source observations and device scope (Table~\ref{tab:threelab}). Precision, recall, and F1 are macro per-device agreement with receiver-observed endpoints; coverage is the fraction of six types receiving any proposal. Scored rows use raw breadth with $\alpha=0.6$, $\beta=0.4$, and $\theta=0.65$. Deleting all receiver observations leaves DIB candidate sets unchanged; full-DIB rows reproduce the earlier three-deployment results exactly.
+Each receiver then uses the other two deployments as sources, with identical observations and device scope across filters (Table~\ref{tab:threelab}). Precision, recall, and F1 (P/R/F1) measure macro per-device agreement with receiver-observed endpoints, and coverage is the fraction of the six types receiving a proposal. Scored rows use raw breadth with $\alpha=0.6$, $\beta=0.4$, and $\theta=0.65$. Removing receiver observations leaves candidate sets unchanged, confirming that selection does not use them.
 
 \begin{table}[t]
 \centering
-\caption{Matched cold-start ablation: each receiver uses the other two deployments as sources. Q = two-site quorum; S = raw-breadth score; C = endpoint-class gate. N counts candidates; Cov. is device coverage. P/R/F1 measure macro agreement with receiver traffic.}
+\caption{Matched cold-start ablation: each receiver uses the other two deployments as sources. Q=two-site quorum; S=raw-breadth score; C=endpoint eligibility; N=candidates; Cov.=device coverage; P/R/F1=macro agreement with receiver traffic over six device types. Full-DIB 95\% F1 CIs (US/UK/YT): [.033,.198]/[.044,.186]/[.116,.384].}
 \label{tab:threelab}
 \scriptsize
 \begin{tabular}{@{}llrrrrr@{}}
@@ -457,8 +471,7 @@ US & Union & 1005 & 100\% & .322 & .358 & .327 \\
  & DIB (QSC) & 36 & 83.3\% & .750 & .065 & .116 \\
 \midrule
 UK & Union & 767 & 100\% & .279 & .449 & .320 \\
- & Q & 48 & 83.3\% & .745 & .078 & .138 \\
- & QS & 48 & 83.3\% & .745 & .078 & .138 \\
+ & Q, QS & 48 & 83.3\% & .745 & .078 & .138 \\
  & DIB (QSC) & 43 & 83.3\% & .784 & .064 & .115 \\
 \midrule
 YT & Union & 1387 & 100\% & .059 & .334 & .095 \\
@@ -469,133 +482,93 @@ YT & Union & 1387 & 100\% & .059 & .334 & .095 \\
 \end{tabular}
 \end{table}
 
-\textbf{Trade-off and review cost.} DIB reduces candidates by 96.4\% (US), 94.4\% (UK), and 92.3\% (YT) relative to union. The four configurations are nested subsets of one queue, so they are operating points on a single review-cost curve (Table~\ref{tab:reviewcost}) rather than competing systems. Union attains higher macro F1 at US and UK, but only by presenting a queue 13--28 times larger: an operator inspects 5.5 (US), 4.3 (UK), and 28.3 (YT) union entries per endpoint the receiver actually observes, against 1.03, 1.16, and 2.89 under full DIB. Each additional confirmed endpoint that union recovers beyond DIB costs 6.5 (US), 5.1 (UK), and 106.7 (YT) further entries. Held at equal effort---a budget equal to the full-DIB queue---DIB confirms 35.0 versus 6.6 (US), 37.0 versus 10.0 (UK), and 37.0 versus 3.8 (YT) endpoints. The union figures assume arbitrary review order, because a pooled queue defines none; any ranking that would improve it is itself an admission filter, which is the mechanism under evaluation. Filtering therefore wins at every receiver once effort, rather than queue exhaustion, is the constraint. Within the filtered region the ordering is receiver-dependent: quorum already reaches 35.1 (US) and 36.7 (UK) at the same budget, and only YT separates the score and class stages (24.8, 30.0, 37.0). Quorum provides most of the reduction; the later stages pay for themselves at YT and are close to neutral at US and UK.
-
-\begin{table}[t]
+\begin{figure}[t]
 \centering
-\caption{Review cost of the same nested queues (six aligned device types, micro-aggregated). Confirmed counts candidates agreeing with a receiver-observed endpoint: agreement, not benignity. Budget yield fixes the number of inspected entries at that receiver's full-DIB queue size and reviews the unranked union queue in arbitrary order.}
-\label{tab:reviewcost}
-\scriptsize
-\begin{tabular}{@{}llrrrr@{}}
-\toprule
-Receiver & Filter & N & Conf. & Rev./conf. & Yield @budget \\
-\midrule
-US & Union & 1005 & 184 & 5.46 & 6.6 \\
- & Q & 42 & 41 & 1.02 & 35.1 \\
- & QS & 40 & 39 & 1.03 & 35.1 \\
- & DIB (QSC) & 36 & 35 & 1.03 & 35.0 \\
-\midrule
-UK & Union & 767 & 178 & 4.31 & 10.0 \\
- & Q & 48 & 41 & 1.17 & 36.7 \\
- & QS & 48 & 41 & 1.17 & 36.7 \\
- & DIB (QSC) & 43 & 37 & 1.16 & 37.0 \\
-\midrule
-YT & Union & 1387 & 49 & 28.31 & 3.8 \\
- & Q & 177 & 41 & 4.32 & 24.8 \\
- & QS & 146 & 41 & 3.56 & 30.0 \\
- & DIB (QSC) & 107 & 37 & 2.89 & 37.0 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=3 by 1, horizontal sep=0.42cm},
+  scale only axis, width=2.10cm, height=1.65cm,
+  xmode=log, log basis x=10,
+  xlabel style={font=\scriptsize}, ylabel style={font=\scriptsize},
+  tick label style={font=\scriptsize},
+  title style={font=\scriptsize, yshift=-2pt},
+  ymin=0, ymax=0.5, xmin=8, xmax=1500,
+  legend style={font=\scriptsize, anchor=north, legend columns=3, /tikz/column sep=3pt},
+]
+\nextgroupplot[title={US}, ylabel={recall},
+  legend to name=paretolegend]
+\addplot[thick, blue] coordinates {(38,0.0678) (36,0.0650) (35,0.0636) (34,0.0618) (28,0.0514) (27,0.0500) (24,0.0481) (18,0.0379)};
+\addlegendentry{$\theta$ sweep}
+\addplot[thick, red, dashed] coordinates {(9,0.0175)(18,0.0351)(27,0.0526)(36,0.0682)(54,0.1013)(72,0.1169)(108,0.1636)(180,0.2220)(288,0.2629)(432,0.3072)};
+\addlegendentry{ranked union}
+\addplot[only marks, mark=triangle*, black] coordinates {(42,0.0793)};
+\addlegendentry{Q}
+\addplot[only marks, mark=square*, teal] coordinates {(40,0.0765)};
+\addlegendentry{QS}
+\addplot[only marks, mark=*, orange] coordinates {(36,0.0650)};
+\addlegendentry{DIB}
+\nextgroupplot[title={UK}, yticklabels=\empty, xlabel={candidates}]
+\addplot[thick, blue] coordinates {(43,0.0644) (41,0.0631) (40,0.0631) (39,0.0618) (38,0.0605) (27,0.0428)};
+\addplot[thick, red, dashed] coordinates {(11,0.0277)(22,0.0529)(32,0.0731)(43,0.0983)(64,0.1311)(86,0.1689)(129,0.2458)(215,0.3126)};
+\addplot[only marks, mark=triangle*, black] coordinates {(48,0.0784)};
+\addplot[only marks, mark=square*, teal] coordinates {(48,0.0784)};
+\addplot[only marks, mark=*, orange] coordinates {(43,0.0644)};
+\nextgroupplot[title={YT}, yticklabels=\empty]
+\addplot[thick, blue] coordinates {(129,0.2229)(122,0.2229)(107,0.2229)(97,0.2229)(86,0.2146)(73,0.2094)(58,0.1778)(48,0.1513)(34,0.1430)};
+\addplot[thick, red, dashed] coordinates {(27,0.1023)(54,0.1978)(80,0.2455)(107,0.2728)(160,0.2796)(214,0.3137)(321,0.3205)};
+\addplot[only marks, mark=triangle*, black] coordinates {(177,0.2823)};
+\addplot[only marks, mark=square*, teal] coordinates {(146,0.2823)};
+\addplot[only marks, mark=*, orange] coordinates {(107,0.2229)};
+\end{groupplot}
+\node at ($(group c2r1.south)+(0,-1.4cm)$) {\ref{paretolegend}};
+\end{tikzpicture}
+\caption{Candidate count and macro recall for cold-start receivers. Solid curves vary $\theta\in[0.50,0.80]$ at $m=2$; dashed curves rank the pooled union by score at increasing budgets.}
+\label{fig:pareto}
+\end{figure}
 
-\textbf{Capture asymmetry.} Observation windows and endpoint-set sizes differ. Full-DIB bootstrap 95\% F1 intervals are [0.033,0.198] (US), [0.044,0.186] (UK), and [0.116,0.384] (YT); a busiest-single-day test gives F1 0.241/0.213/0.258. These six-device results do not rank receiving environments systematically; the artifact provides per-device counts and window diagnostics.
+DIB reduces candidate counts by 96.4\% at US, 94.4\% at UK, and 92.3\% at YT, but this reduction sacrifices coverage. The full union contains more receiver-observed endpoints---184/178/49 among 1005/767/1387 candidates---and achieves higher macro F1 at US/UK. It also requires 5.46/4.31/28.31 inspected entries per receiver-observed endpoint, compared with DIB's 1.03/1.16/2.89. At the smaller DIB budgets, unranked union yields only an expected 6.6/10.0/3.8 matching endpoints.
 
-\subsection{RQ3: Admission Inside the Breadth Bound}
+Ordering alone nevertheless recovers much of the review yield. At DIB's budgets of 36/43/107 candidates, ranking the full union yields 35/39/40 receiver-observed endpoints, compared with DIB's 35/37/37. The ranked prefixes overlap DIB's queues by 86.9--90.7\%; the additional matching endpoints at UK and YT pass quorum and score but fail endpoint eligibility. Quorum supplies most of the reduction at US/UK, yielding 35.1/36.7 matching endpoints at the DIB budgets. At YT, yield rises from 24.8 with quorum to 30.0 with quorum and score and 37.0 with the full rule.
+
+Admission and ordering thus serve different purposes: ranking limits review to a budget, whereas admission excludes adversary-only evidence under Criterion~\ref{crit:poison-bound}. We recommend \emph{threshold-then-rank} when that condition holds, reviewing a score-ordered prefix of the admitted queue when the budget is smaller than the queue. Figure~\ref{fig:pareto} distinguishes these choices: solid curves vary the admission threshold and show its effect on queue size and recall; dashed curves rank the full union at increasing budgets. The solid curves do not evaluate prefixes of a fixed admitted queue.
+
+
+These comparisons describe filter behavior on the selected captures, not a ranking of receiving environments. Observation windows and endpoint-set sizes differ, and only six device types are common to all three deployments. Their 95\% F1 intervals (Table~\ref{tab:threelab}), computed by percentile bootstrap over those six types (1,000 resamples, seed 42), overlap across receivers. Restricting US and UK to their busiest days gives macro F1 0.241/0.213/0.258, further illustrating sensitivity to the observation window.
+
+\subsection{Adversarial Observations and Fabricated Evidence}
 \label{sec:security-results}
-We test captured A1 observations separately from fabrications governed by the conditional bound. We inject 59 A1 facts at $k=1,\ldots,10$ pseudo-sites and test resolved-name and port-masquerading fabrications. Bounded A2 crosses 20 seeds and malicious-site fractions $\{.05,.1,.2,.3,.4,.5\}$, each realized by uniformly sampling the corresponding rounded number of pseudo-sites.
+Captured malicious traffic and fabricated reports challenge admission in different ways. We inject both into the ten UNSW pseudo-sites, whose partition fixes the reporting population and lets us control the malicious share $f_s$ in Criterion~\ref{crit:poison-bound}. This setup does not establish reporter independence in a real consortium; that remains a governance assumption (Sec.~\ref{subsec:trust}). The tests include 59 captured A1 facts at $k=1,\ldots,10$ pseudo-sites, resolved-name and port-masquerading fabrications, and A2 across 20 seeds and malicious-site fractions $\{.05,.1,.2,.3,.4,.5\}$, realized by uniformly sampling the rounded pseudo-site count.
 
-DIB stages none of the 59 captured facts, whereas pooled union and frequency filtering stage all of them; their peers are unresolved IP addresses and remain below $\theta$ even when eligibility is bypassed. The baseline comparison quantifies the corresponding benign-coverage cost on the same seeded pseudo-site setting, with one exception: a locally observed endpoint left uncovered by the imported policy.
+DIB stages none of the 59 captured A1 facts; pooled union and frequency filtering stage all of them. Five annotation logs contain 354 packets with IP-literal destinations. Retaining device-originated packets with recognized transport protocols yields 165 observations and 59 endpoint facts. Replacing IPs with resolvable names, with devices, sites, and timing unchanged, raises admission from 0/150 to 21/150 configurations: five device types, $k=1,\ldots,10$ reporting sites, and spread windows of 1, 30, or 120 days. Admission first occurs at $k=7$ over 120 days (score 0.679). The filter rejects unresolved infrastructure, not malicious behavior in general: resolved attacker domains can enter review.
 
-The bounded-A2 sweep uses raw $C_s$, without trust weighting or clustering; its sampled malicious-site share directly instantiates $f_s$. Everything in this subsection is conditional on the deployment governing that share.
+Port masquerading exposes the same distinction. With other inputs fixed, ports 53/123 pass endpoint eligibility while the port-443 control fails. At a one-day horizon, this counterfactual and the bounded-A2 tests share a maximum score of 0.354; extending fabrication to 120 days exceeds that value. At $f_s=0.30$, the largest score passing quorum is 0.562 over 120 days, still below $\theta$ and consistent with the analytical bound of 0.58. At $f_s=0.50$, outside the assumed bound, a 30-day fabrication reaches 0.663 and enters MonitorOnly. Thus, failure of admission filtering creates a false proposal, not permission to communicate.
 
-The port-masquerading counterfactual holds other inputs fixed: ports 53/123 are eligible; the otherwise identical port-443 control is not. Extending fabrication to 120 days exceeds the one-day bounded-A2 maxima; both tests agree at the one-day horizon (0.354). Table~\ref{tab:portmasq} reports the largest quorum-clearing scores. At $f_s=0.30$, rejection throughout is consistent with the analytical upper bound 0.58. At $f_s=0.50$, outside the assumed region, the fact stages as \textsc{MonitorOnly}: admission failure adds a false proposal but cannot itself authorize enforcement.
-
-\begin{table}[t]
-\centering
-\caption{Port-masquerading counterfactual: largest quorum-clearing score by malicious-site fraction $f_s$ and fabrication horizon (ports 53/123 eligible; port 443 control ineligible; $\theta=0.65$).}
-\label{tab:portmasq}
-\scriptsize
-\begin{tabular}{@{}rrrl@{}}
-\toprule
-$f_s$ & Horizon (days) & Score & Outcome \\
-\midrule
-0.30 & 120 & 0.562 & rejected (below $\theta$) \\
-0.50 & 30 & 0.663 & staged (\textsc{MonitorOnly} only) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Admission-parameter sensitivity (G5).}
+\subsubsection{Parameter Sensitivity, Identity Inflation, and Drift}
 \label{sec:sensitivity-results}
-We sweep $\theta\in[0.50,0.80]$ and $\alpha\in[0.4,0.9]$ on Mon(IoT)r and YourThings~\cite{alrawi2019yourthings}; the selected $\alpha=0.6$ satisfies Criterion~\ref{crit:poison-bound}'s $\alpha>0.5$ requirement at $f_s=0.30$, $\theta=0.65$, bounding an adversary-only score at 0.58. At this operating point, Mon(IoT)r F1 is 0.054, against a corpus-best 0.071 at $\theta=0.50$ or $\alpha=0.9$: choosing parameters from the external threat bound rather than the corpus-specific optimum costs 0.017 F1.\footnote{The complete grid in the released artifact confirms the coverage--filtering trade-off described here.}
+The operating point chosen from the adversarial bound is not the one that maximizes traffic agreement. Sweeping $\theta\in[0.50,0.80]$ and $\alpha\in[0.4,0.9]$ on Mon(IoT)r yields a best macro F1 of 0.071, compared with 0.054 at the chosen setting. Figure~\ref{fig:pareto} reports the separate cold-start threshold sweep at fixed $m=2$.
 
-\textbf{Quorum sensitivity.} Using the licensed UNSW input, we reran the seed-42 pseudo-site sweep over feasible quorums $m\in\{1,2,3,5\}$ and site counts $N\in\{2,3,5,10\}$ ($m=4$ needs an undistributed trace). At $N=10$, $m=1,2,3,5$ each stage 346 facts and retain 63.17\% of the capture-observable macro ceiling, so this partition does not empirically distinguish the lower quorums --- not evidence that their adversarial tolerance is equivalent: $m=2$ remains the smallest point requiring two distinct reports, and a cold-start receiver logically needs $m$ external reporting sites. These are pseudo-site sensitivity results, not a consortium-size measurement.
+Identity inflation deliberately violates the malicious-share assumption. The test grid uses 200--3,200 fabricated identities over 20--400 days, diversifying endpoint sets by 0--50\% of a baseline pool. Raw counting admits the fabrication in 45 of 48 representative configurations. Trust weighting and clustering reject those configurations, while RWV admits all 48 at its fixed operating point. That protection is not universal: padding fabricated identities with real endpoints defeats clustering in the extreme configuration (score 0.905), and no tested Jaccard threshold in $[0.6,0.95]$ withstands every padding level.
 
-\subsection{RQ3: Admission Outside the Breadth Bound}
-\label{sec:sybil-results}
-Two tests leave Criterion~\ref{crit:poison-bound}'s assumption behind: fabricated identities exceed the breadth share, and behavioral drift stays consistent with it while being adversarial. Neither is covered by the analytical constraint, and both fail in the same restricted way---a false review candidate, never an authorization.
-
-\textbf{Fabricated identities.} We evaluate identity inflation. Raw counting stages the fabrication in 45/48 representative cells; trust weighting and clustering reject it, whereas RWV admits all 48. These are not guarantees: padding real endpoints defeats clustering at the extreme cell (score 0.905), and no tested Jaccard threshold in $[0.6,0.95]$ withstands every padding level. The complete grid is in the artifact.
-
-\textbf{Legitimate and malicious behavioral change.}
-\label{sec:drift-results}
-A synthetic rollout over 27 device types sweeps adoption $p\in\{.2,.4,.5,.6,.8,1\}$ and duration $D\in\{1,7,30,120\}$ over a 120-day horizon, labeling the same injected endpoint alternately as legitimate change or compromise. Both labels produce identical scores: 69 of 162 device-type/adoption cases admit within the horizon (median 7 days). Existing Active facts remain authorized for export and receive only a review flag.
-
-This result exposes the limit of telemetry-only admission: a rollout and a slow compromise with identical endpoints and cadence are indistinguishable. A review flag calls for operator or out-of-band investigation (Sec.~\ref{sec:discussion}).
-
-\subsection{Management-Path Feasibility and Reconciliation}
-\label{sec:scalability-results}
-We rerun the corrected registry on a 16-core x86\_64 Linux host using Python 3.10.13. At 1, 10, 50, and 100 writers, each worker executes 20 mixed service operations after an equally sized discarded warm-up; results average three repetitions. Throughput at 100 writers is $317.5\pm10.8$ operations/s, with median latency $3.8\pm0.2$~ms; p99 latency grows from $5.3\pm0.4$~ms at one writer to $5895.5\pm191.4$~ms at 100. All 9,660 timed operations complete without unexpected errors. These short service-level runs characterize contention, not sustained HTTP throughput or distributed scalability.
-
-Nine correctness scenarios run 200 trials each; a retry-contention scenario runs 25 trials with 25 writers. All 1,825 trials report zero violations of the tested idempotency, dispute-exactness, local-revoke-race, site-isolation, and audit-history checks. These schedules do not prove linearizability; manifests and per-scenario results are in the supplement.
-
-\textbf{Distributed deployment.} An evidence service hosts shared Score state and dispute/restore transitions; ten independent site services host their own LocalDecision records and enforce revocation provenance locally. Dispute-open, confirming-dispute, and restore events fan out synchronously with bounded retries (3 attempts, 1~s each). For an unreachable site, a pending-fanout record retains the latest target state. Reconnection applies that record through the same idempotent path, ordered by a monotonic per-fact sequence number. This is a lifecycle/reconciliation mechanism under partial connectivity, not a claim of full distributed consistency.
-
-At 100 concurrent writers (5 repeated runs) the distributed deployment sustains 530.3 operations/s with p99 latency $454.8\pm9.1$~ms and no unexpected errors across the 2,000 timed operations of that load point. Throughput rises from 112.6 operations/s at one writer to 547.9 at 50 and 530.3 at 100, so the ten site processes absorb an order-of-magnitude increase in offered load without collapse, and median latency grows approximately linearly (9.5/35.9/90.7/168.7~ms at 1/10/50/100 writers) rather than super-linearly. This is the management path under HTTP, including synchronous dispute and restore fan-out to ten sites. It is a single-host operating point on a 16-core machine, not a distributed-scalability limit; the single-node measurements above are in-process service calls under a different operation mix and are not comparable to it.
-
-\textbf{Missed-event reconciliation.} We run 40 fault-injection trials across four outage scenarios (Table~\ref{tab:faultinjection}). Three withhold one event type each. The compound case disconnects an Active site before dispute-open, confirming dispute, and restore, withholding the entire episode. Reconciliation must invalidate its stale grant directly from the final \textsc{MonitorOnly} target, without relying on prior receipt of Disputed. Thus collapsing pending events must preserve authorization invalidation, not merely the final state label. All 40 trials converge to the correct authoritative state after reconnection, applying exactly one collapsed fan-out record regardless of missed-event count. A further 20 trials, not tabulated, resolve races between reconciliation and new fan-out events correctly using sequence numbers.
-
-\begin{table}[t]
-\centering
-\caption{Disconnected-site reconciliation trials. The compound outage hides an entire dispute/restore episode; reconciliation must invalidate the stale grant despite missing all intermediate states.}
-\label{tab:faultinjection}
-\scriptsize
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{@{}p{3.1cm}rp{1.9cm}r@{}}
-\toprule
-Missed event(s) while disconnected & Trials & Converges to & Time (s) \\
-\midrule
-Dispute-open only & 10 & authoritative state & \multirow{3}{*}{$0.51\pm0.03$ (n=30)} \\
-Confirming dispute only & 10 & authoritative state & \\
-Restore only & 10 & authoritative state & \\
-\midrule
-Compound: dispute-open + confirming dispute + restore & 10 & \textsc{MonitorOnly}, no valid grant & $0.50\pm0.04$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Process restart ($\sim$0.45~s) dominates reconciliation logic ($<$0.1~s). Distributed services use direct SQLite access and no audit-history table, whereas the single-node registry uses SQLAlchemy with audit history; the two are reported independently for that reason.
-
-\textbf{Architectural ablation.} Two alternatives contextualize per-site HTTP processes. Ten SQLite files across threads in one Python process showed no measurable improvement (p99 78.1~ms vs. 83.7~ms unsharded at 100 workers), consistent with GIL-serialized bytecode. Processes sharing files through SQLite \texttt{ATTACH} performed worse (p99 30.0~s vs. 78.7~ms unsharded, 10 workers across 16 processes; one diagnostic run), consistent with WAL shared-memory contention. A forced write interruption rolled back all attached files in that case; WAL does not generally guarantee cross-database atomicity during commit crashes. Independent per-site processes without shared files performed best among these three configurations.
+Even without identity inflation, identical observations cannot reveal different intentions. A synthetic rollout tests all $27\times6=162$ device-type/adoption pairs, with $p\in\{.2,.4,.5,.6,.8,1\}$, at each duration $D\in\{1,7,30,120\}$ days; 69 pairs enter review at $D=120$. A separate time-to-admission sweep samples the same rollout at days 1, 3, 7, 14, 30, 60, 90, and 120. Among the 69 pairs admitted by day 120, the median first-admission checkpoint is seven days. Labeling an injected endpoint as legitimate change or compromise produces identical scores. Existing Active facts remain authorized with only a review flag. Distinguishing a rollout from a slow compromise with identical endpoints and cadence therefore requires operator review or out-of-band investigation.
 
 \section{Discussion}
 \label{sec:discussion}
 
-\textbf{Independent authority over shared evidence.} DIB makes approval validity and revocation origin explicit so shared emergency withdrawal cannot silently reuse approvals or erase local vetoes on restoration. Its management value is this lifecycle across administrative domains, not a judgment that approved traffic is appropriate. Review time, decision quality, and usability remain unmeasured.
+Recovery requires approval validity and revocation origin, whether represented through states or history. The mutations (Table~\ref{tab:tla}) and restoration-policy ablation (Table~\ref{tab:comparison}) expose failures when this information or its checks are omitted. The review process still requires evaluation with operators.
 
-\textbf{Smaller queues, lower coverage.} Full-DIB macro F1 of 0.115--0.247 accompanies smaller queues: 462 candidates versus union's 24,121 in US full capture, and 36--107 for cold-start receivers versus, for example, YT's 1,387 union candidates (Tables~\ref{tab:workload}--\ref{tab:threelab}). The relevant question is not which queue scores higher when fully reviewed, but which one an operator can afford to review: pooled union costs 4.3--28.3 inspected entries per confirmed endpoint against DIB's 1.03--2.89 (Table~\ref{tab:reviewcost}). Quorum supplies most of that gain, and the later filters pay only at YT. Where an operator can exhaust the queue and a missed endpoint is costlier than a longer queue, quorum-only or QS remains the right operating point. Admission choices do not replace lifecycle authorization checks.
+Candidate selection can adapt without changing local authorization or recovery. Quorum accounts for most queue reduction at US/UK; ordering explains the advantage over unranked pooling. Threshold-then-rank suits deployments that maintain the bounded-share assumption required by P5. Trust weighting and clustering mitigate tested identity inflation but fail under padding. Ranked union yields slightly more receiver-observed endpoints at matched budgets, but no tested policy establishes benignity or necessity. Review capacity should inform the retention window $W$, whose practical value remains open.
 
-\textbf{Coverage and transfer.} The 0.25 US/UK endpoint overlap is consistent with environmental variability~\cite{allowlistvariability}. UNSW pseudo-sites measure within-capture retention, not cross-organization transfer or independent-consortium quorum robustness (Sec.~\ref{sec:sensitivity-results}). The three-deployment transfer test remains limited to six aligned device types (Sec.~\ref{sec:loo-results}).
+Local control does not eliminate withdrawal's availability costs. One reporter can interrupt service under immediate suspension; requiring two preserves permissions until corroboration but delays withdrawal if no second report arrives. Both policies remain vulnerable to collusion, and the prototype lacks dispute rate limits and reputation penalties. Unreachable gateways can retain stale rules until reconnection, with no established withdrawal deadline. Operators need visibility into pending updates and installed policies; rule leases could bound stale permissions at an additional availability cost.
 
-\textbf{Adversarial evidence.} Identical traffic can represent either legitimate rollout or attack; neither a score nor a review flag resolves intent. Criterion~\ref{crit:poison-bound} assumes an externally governed $f_s$, informed by membership vetting or dispute history, not estimated from traffic. The fabrication is rejected at $f_s=0.30$ but stages without authorization at $f_s=0.50$ (Table~\ref{tab:portmasq}). Weighting and clustering are empirical mitigations, not general Sybil resistance. Identity controls and local review remain necessary; restrictive disputes prevent escalation but permit availability attacks.
+The shared evidence service is a throughput bottleneck and single point of failure for candidate flow and withdrawal propagation. It holds no local authorization state: failure can delay withdrawal but cannot itself grant or revoke local permissions. Replication and recovery remain deployment concerns. Co-located experiments do not evaluate WAN behavior or production workloads; finite models assume authenticated callers, and gateway tests disable signature validation. Deployment requires the authentication, roles, and signing integration in Sec.~\ref{subsec:trust}.
 
-\textbf{Deployment limits.} An unreachable gateway may retain stale permissions throughout a partition. Production requires pending/applied/stale monitoring and a connectivity-loss policy; default-deny leases remain unevaluated. The extended model checks I3 among reachable, reconciled sites, not immediate withdrawal everywhere. Fan-out retries for at most 3~s before queuing; reconciliation takes $0.51\pm0.03$~s on one host without WAN latency (Sec.~\ref{sec:scalability-results}). The model has no clocks or retry timers and establishes no 0.51~s deadline (Sec.~\ref{sec:lifecycle-results}). Gateway tests cover reachable, containerized OpenWrt only. The evidence service remains a single point of failure; its recovery is unevaluated.
+The pseudo-site partition and six-type alignment restrict generalization. Historical captures expose names through DNS or HTTP/TLS metadata. Encrypted Client Hello protects the inner server name, and encrypted DNS removes another source of name-to-address associations~\cite{rfc9849}; QUIC carries the TLS handshake in QUIC frames~\cite{rfc9001}. Coverage of fleets using these mechanisms remains unverified. Resolver-side telemetry or endpoint instrumentation could supply missing names without changing approval and recovery rules.
+
+Policy output is similarly scoped: the exporter emits resolved-name TCP/UDP ACEs, not the TLS/DTLS profile parameters added by RFC~9761~\cite{rfc9761}. If a manufacturer profile later becomes available, it remains separate from locally approved facts, with the MUD manager combining the sources under deny-overrides. Reconciling them with authorized MUD-URL updates~\cite{mudacceptableurls} remains future work.
 
 \section{Conclusion}
 \label{sec:conclusion}
-DIB manages local MUD policy lifecycles from shared IoT evidence. Admission creates proposals; local approval creates authority; disputes invalidate it; restoration requires renewed approval and preserves local revocations. A finite TLA+ model checks these properties across 3,837,084 reachable states. Registry and reconciliation tests exercise the management path, while OpenWrt/osMUD demonstrates firewall changes on a reachable gateway.
-
-The matched cold-start experiment reduces proposals by 92.3--96.4\% relative to union, with higher precision and lower recall. Quorum provides most of the reduction; additional filters impose receiver-dependent costs. UNSW retention is 63.2\% of observable macro behavior, with 7.9\% complete-profile recall. At a fixed review budget these smaller queues confirm 3.7--9.8$\times$ more endpoints than pooled union; whether that is the right operating point still depends on local coverage requirements. Under the stated trust assumptions, DIB's lifecycle governs authorization and reversal without establishing benignity or replacing local review.
+This paper presented DIB for managing locally authorized MUD policies from shared IoT observations. Finite-model checks and guard-removal mutations assess its authorization lifecycle; OpenWrt/osMUD tests demonstrate enforcement. Outage experiments show that one collapsed update preserves local vetoes and invalidates stale approvals after a missed withdrawal and restoration episode. Candidate-selection and suspension experiments quantify review volume and availability costs. Future work will evaluate operator review, mechanisms to bound gateway withdrawal time, and recovery of the shared evidence service.
 
 \begin{thebibliography}{00}
 
@@ -626,7 +599,6 @@ Architecture to Enhance Smart Home Security,'' in \emph{Proc. SpliTech}, 2023, p
 
 \bibitem{osmud} osMUD Project, ``osMUD: Open Source MUD Manager,''
 \url{https://osmud.org}. (Accessed Jul. 24, 2026.)
-
 
 \bibitem{hernandezramos2021mudreview} J. L. Hern\'andez-Ramos, S. N. Matheu,
 A. Feraudo, G. Baldini, J. Bernal Bernabe, P. Yadav, A. Skarmeta, and
@@ -728,43 +700,59 @@ Cross-Domain Access Control via Verifiable Identity and Policy-Based Authorizati
 in \emph{Proc. IEEE 24th Int. Conf. Trust, Security and Privacy in Computing and
 Communications (TrustCom)}, 2025, pp. 1489--1498.
 
-\bibitem{liuzerotrust2024} Y. Liu \emph{et al.}, ``Secure and Scalable Cross-Domain
-Data Sharing in Zero-Trust Cloud-Edge-End Environment Based on Sharding Blockchain,''
-\emph{IEEE Trans. Dependable Secure Comput.}, vol. 21, no. 4, pp. 2603--2618,
-2024, doi: 10.1109/TDSC.2023.3313799.
+\bibitem{zanzibar} R. Pang \emph{et al.}, ``Zanzibar: Google's Consistent, Global
+Authorization System,'' in \emph{Proc. USENIX Annu. Tech. Conf. (ATC)}, 2019,
+pp. 33--46.
 
-\bibitem{sun2025sanitizable} J. Sun \emph{et al.}, ``Sanitizable Cross-Domain Access
-Control With Policy-Driven Dynamic Authorization,'' \emph{IEEE Trans. Dependable
-Secure Comput.}, vol. 22, no. 4, pp. 4126--4142, 2025,
-doi: 10.1109/TDSC.2025.3541819.
+\bibitem{mudacceptableurls} M. Richardson, W. Pan, and E. Lear, ``Authorized
+Update to MUD URLs,'' IETF Internet-Draft
+\texttt{draft-ietf-iotops-mud-acceptable-urls}, work in progress, 2025.
+
+\bibitem{xacml3} OASIS, ``eXtensible Access Control Markup Language (XACML)
+Version 3.0,'' OASIS Standard, Jan. 2013.
+
+\bibitem{ponder} N. Damianou, N. Dulay, E. Lupu, and M. Sloman, ``The Ponder
+Policy Specification Language,'' in \emph{Proc. IEEE Int. Workshop on Policies
+for Distributed Systems and Networks (POLICY)}, 2001, pp. 18--38.
+
+\bibitem{crdt} M. Shapiro, N. Preguica, C. Baquero, and M. Zawirski,
+``Conflict-Free Replicated Data Types,'' in \emph{Proc. Int. Symp. Stabilization,
+Safety, and Security of Distributed Systems (SSS)}, 2011, pp. 386--400.
+
+\bibitem{rfc9849} E. Rescorla, K. Oku, N. Sullivan, and C. A. Wood,
+``TLS Encrypted Client Hello,'' RFC 9849, IETF, Mar. 2026.
+
+\bibitem{rfc9001} M. Thomson and S. Turner, ``Using TLS to Secure QUIC,''
+RFC 9001, IETF, May 2021.
+
 \end{thebibliography}
 
 \makeatletter
-\def\@IEEEBIOphotowidth{0.82in}
-\def\@IEEEBIOphotodepth{0.68in}
-\def\@IEEEBIOhangwidth{0.92in}
-\def\@IEEEBIOhangdepth{0.68in}
-\def\@IEEEBIOskipN{0.15\baselineskip}
+\def\@IEEEBIOphotowidth{0.74in}
+\def\@IEEEBIOphotodepth{0.58in}
+\def\@IEEEBIOhangwidth{0.84in}
+\def\@IEEEBIOhangdepth{0.58in}
+\def\@IEEEBIOskipN{0.05\baselineskip}
 \makeatother
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author One}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author One}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author Two}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author Two}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author Three}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author Three}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author Four}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author Four}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author Five}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author Five}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author Six}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author Six}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
-\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.6in}\rule{0.7in}{0pt}}}}]{Author Seven}
+\begin{IEEEbiography}[{{\fbox{\rule{0pt}{0.52in}\rule{0.62in}{0pt}}}}]{Author Seven}
 received the Ph.D. degree in [field] from [university] in [year]. [He/She/They] is currently [position] at [institution]. Research interests include [topic one], [topic two], and [topic three].
 \end{IEEEbiography}
 

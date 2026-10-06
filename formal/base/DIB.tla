@@ -168,7 +168,9 @@ Restore(s, f) ==
 (* nor any other site's state or export flag.                              *)
 (***************************************************************************)
 LocalRevoke(s, f) ==
-    /\ state[s][f] \in {"MonitorOnly", "Active"}
+    /\ \/ state[s][f] \in {"MonitorOnly", "Active", "Disputed"}
+       \/ /\ state[s][f] = "Revoked"
+          /\ revokeReason[s][f] = "Dispute"
     /\ state' = [state EXCEPT ![s][f] = "Revoked"]
     /\ exported' = [exported EXCEPT ![s][f] = FALSE]
     /\ grantValid' = [grantValid EXCEPT ![s][f] = FALSE]

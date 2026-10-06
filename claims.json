@@ -1,5 +1,5 @@
 {
-  "paper_version": "v32.0",
+  "paper_version": "v42.0",
   "paper_source": "paper/main.tex",
   "selected_configuration": "configs/graph_free_selected.yaml",
   "seed_policy": "Seeded aggregates use seeds 0-19; A1, Sybil and drift use seed 42; cross-lab, OpenWrt and concurrency use seed 0.",
@@ -8,41 +8,49 @@
     {
       "id": "tla_base_states",
       "section": "RQ1",
-      "value": "3,837,084 reachable states satisfy I1-I3 and export eligibility",
+      "value": "4,311,852 reachable states satisfy checked lifecycle/export properties",
       "result": "formal/logs/full_lifecycle.log",
-      "generator": "formal/base/run_tlc.sh",
+      "generator": "python scripts/run_formal.py --jar /path/to/tla2tools.jar",
       "input": "none (finite model, 3 sites x 2 facts)"
     },
     {
       "id": "tla_mutations",
       "section": "RQ1",
       "value": "six guard-removal mutations each produce a counterexample",
-      "result": "formal/logs/mutation_m1_restore_recreates_grant.log, formal/logs/mutation_m2_commit_escapes_site.log, formal/logs/mutation_m3_export_while_disputed.log, formal/logs/mutation_m4_local_restore_ignores_dispute.log, formal/logs/mutation_m5_local_revoke_escapes_site.log, formal/logs/mutation_m6_global_restore_clears_local_revoke.log",
-      "generator": "formal/base/run_tlc.sh",
+      "result": "formal/mutations/m1/result.log, formal/mutations/m2/result.log, formal/mutations/m3/result.log, formal/mutations/m4/result.log, formal/mutations/m5/result.log, formal/mutations/m6/result.log",
+      "generator": "python scripts/run_formal.py --jar /path/to/tla2tools.jar --mutations-only",
       "input": "none"
     },
     {
       "id": "tla_no_commit_states",
       "section": "RQ1",
-      "value": "removing operator-commit leaves 1,749,604 reachable states, none Active",
+      "value": "2,076,196 reachable states without operator-commit, none Active",
       "result": "formal/logs/evidence_only.log",
-      "generator": "formal/base/run_tlc.sh (DIBEvidenceOnly.cfg)",
+      "generator": "python scripts/run_formal.py --jar /path/to/tla2tools.jar",
       "input": "none"
     },
     {
       "id": "tla_distributed_extension",
       "section": "RQ1",
-      "value": "718,571 states generated, 44,610 distinct, depth 18, no counterexample",
+      "value": "815,335 generated states, 48,960 distinct, depth 18, no violation",
       "result": "formal/logs/distributed_extension.log",
-      "generator": "java -cp tla2tools.jar tlc2.TLC -config DIB_Distributed.cfg DIB_Distributed.tla (formal/distributed/)",
+      "generator": "python scripts/run_formal.py --jar /path/to/tla2tools.jar",
       "input": "none"
+    },
+    {
+      "id": "distributed_site_count_sweep",
+      "section": "Management path",
+      "value": "equal-stack topology sweep (N=1,2,5,10 site containers, everything else fixed): one site saturates at 320.9 ops/s, two or more reach 523-558, so distribution is worth 1.63-1.75x at 50 and 100 writers; the whole gain arrives at N=2 and the evidence service is the ceiling beyond it; ten sites are 20.6% slower than one at a single writer; 6 unexpected errors in 64,400 timed operations",
+      "result": "results/site_count/site_count_summary.csv, results/site_count/throughput_n1.csv, results/site_count/throughput_n2.csv, results/site_count/throughput_n5.csv, results/site_count/throughput_n10.csv",
+      "generator": "bash code/scripts/distributed_site_count_sweep.sh",
+      "input": "Docker images declared in code/src/dib/registry/distributed/docker-compose.yml"
     },
     {
       "id": "registry_regression",
       "section": "RQ1",
-      "value": "global restore erased the local veto before the fix; 33 registry tests pass after it",
-      "result": "formal/logs/regression_before.log, formal/logs/regression_after.log, formal/logs/registry_trace.json",
-      "generator": "python -m pytest code/tests/tests/test_registry.py",
+      "value": "39 focused registry/rescoring tests, including vetoes recorded during shared withdrawal",
+      "result": "results/lifecycle_v35/regression.log",
+      "generator": "PYTHONPATH=code/src python -m pytest code/tests/tests/test_registry.py code/tests/tests/test_rescoring_non_destructive.py -q",
       "input": "none"
     },
     {
@@ -99,6 +107,14 @@
       "value": "matched cold-start ablation over three deployments and six aligned device types; DIB reduces candidates by 96.4% (US), 94.4% (UK), 92.3% (YT)",
       "result": "results/three_lab_matched/matched_ablation.csv, results/three_lab_matched/per_device.csv",
       "generator": "code/scripts/v28_matched_ablation.py",
+      "input": "Mon(IoT)r and YourThings traces obtained separately under their terms"
+    },
+    {
+      "id": "union_ranked_budget",
+      "section": "RQ2",
+      "value": "score-ranked pooled union at the full-DIB budget confirms 35.0 (US), 39.0 (UK), 40.0 (YT) endpoints against DIB's 35/37/37; the ranking lifts yield 3.9-10.6x over arbitrary order, and DIB's queue sits 0/2/22 entries above the shortest ranked prefix of equal yield; the ranked prefix is 86.9-90.7% exactly what DIB admits, with no entry below theta and none single-reporter, and yield per entry drops 1.4x (US/UK) and 6.7x (YT) past the DIB cut",
+      "result": "results/union_ranked/union_ranked_budget.csv, results/union_ranked/ranked_union_curve.csv, results/union_ranked/ranked_prefix_composition.csv, results/union_ranked/ranked_marginal_return.csv",
+      "generator": "code/scripts/union_ranked_budget.py",
       "input": "Mon(IoT)r and YourThings traces obtained separately under their terms"
     },
     {
@@ -220,6 +236,54 @@
       "result": "results/review_cost/review_cost.csv, results/review_cost/fixed_budget.csv, results/review_cost/marginal_cost.csv",
       "generator": "code/scripts/review_cost_curve.py",
       "input": "derived from results/three_lab_matched/per_device.csv; no licensed trace needed"
+    },
+    {
+      "id": "restoration_policy_ablation",
+      "section": "RQ1",
+      "value": "six sequences per policy: persistent approval exports 12/18 subject ACEs without new commits and preserves 6/6 vetoes; blanket reset 0/18 and 0/6; DIB 0/18 and 6/6",
+      "result": "results/restore_ablation/results.json",
+      "generator": "PYTHONPATH=code/src python code/scripts/v36_restore_ablation.py --output /tmp/restore-ablation.json",
+      "input": "none; deterministic sequential in-process API cases"
+    },
+    {
+      "id": "suspension_threshold_api",
+      "section": "VI-H",
+      "value": "100 facts at ten sites; one reporter removes 100 ACEs/site for q=1 and zero for q=2; two reporters remove all under both; each preserves 100 local vetoes",
+      "result": "results/lifecycle_v35/api_campaign.json",
+      "generator": "PYTHONPATH=code/src python code/scripts/v35_lifecycle_experiment.py",
+      "input": "none; in-process API, no network timing"
+    },
+    {
+      "id": "dispute_flood",
+      "section": "VI-H",
+      "value": "100 requests suspend 1,000 site authorizations in 11.3s; read throughput 432.3 to 366.0 ops/s; recovery 11 requests/fact in 21.6s",
+      "result": "results/dispute_flood/dispute_flood_summary.json",
+      "generator": "code/scripts/dispute_flood.py",
+      "input": "networked distributed service deployment; historical measurement, not re-run for v36"
+    },
+    {
+      "id": "a1_resolved_peer_counterfactual",
+      "section": "RQ3",
+      "value": "all 354 raw captured A1 packets are IP-literal, so all 59 captured facts fail endpoint eligibility regardless of score (0/150 admitted cells across k=1..10, spread_days in {1,30,120}); replacing the captured IP with a resolvable name, holding devices/sites/timing fixed, raises admission to 21/150 cells, first at k=7 sites over a 120-day window (score 0.679)",
+      "result": "results/a1_resolvable/a1_resolvable_counterfactual.csv, results/a1_resolvable/manifest.json",
+      "generator": "code/scripts/a1_resolvable_counterfactual.py",
+      "input": "UNSW-2018 attack annotations obtained separately under their terms"
+    },
+    {
+      "id": "pareto_frontier_sweep",
+      "section": "RQ2",
+      "value": "sweeping theta in [0.50,0.80] and m in {2,3} on the three-lab leave-one-receiver-out setting places quorum, quorum+score, DIB, and the ranked-union curve on one queue-size/recall frontier; the operating point (theta=0.65, m=2) reproduces the matched-ablation DIB row exactly (US 36/.065, UK 43/.064, YT 107/.223)",
+      "result": "results/pareto_frontier/sweep.csv, results/pareto_frontier/frontier_points.csv, results/pareto_frontier/manifest.json",
+      "generator": "code/scripts/pareto_frontier.py",
+      "input": "Mon(IoT)r and YourThings traces obtained separately under their terms"
+    },
+    {
+      "id": "offline_veto_reconciliation",
+      "section": "RQ1",
+      "value": "ten trials over real loopback HTTP with independent site/evidence processes: a local veto recorded before a target site is killed survives a complete missed dispute/confirmation/restore episode for that fact; the formerly Active subject at the same site returns to MonitorOnly on reconciliation; neither exports before a fresh commit; an unrelated Active fact stays exportable throughout; repeated reconciliation and stale replay are no-ops; direct commit over the veto is rejected (HTTP 409)",
+      "result": "results/offline_veto/results.json",
+      "generator": "code/scripts/offline_veto_reconciliation.py",
+      "input": "none"
     }
   ]
 }

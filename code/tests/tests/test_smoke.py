@@ -15,8 +15,6 @@ def test_config_yaml_loads_with_required_sections() -> None:
 
 
 def test_repository_layout_has_expected_top_level_entries() -> None:
-    code_root = CODE_ROOT
-    repository_root = code_root.parent
     for entry in (
         "src/dib",
         "tests",
@@ -24,15 +22,12 @@ def test_repository_layout_has_expected_top_level_entries() -> None:
         "configs/default_hyperparams.yaml",
         "requirements.txt",
     ):
-        assert (code_root / entry).exists(), f"missing expected code entry: {entry}"
-    assert (repository_root / "README.md").exists(), "missing expected repository entry: README.md"
-    # The development repository keeps the numbered experiment tree; the released
-    # artifact keeps the per-claim evidence tree. Exactly one of the two is present.
+        assert (CODE_ROOT / entry).exists(), f"missing expected code entry: {entry}"
+    repository_root = CODE_ROOT.parent
+    assert (repository_root / "README.md").exists(), "missing repository README"
     development_layout = (repository_root / "experiments/18_openwrt_enforcement/docker-compose.yml").exists()
-    artifact_layout = (repository_root / "openwrt/docker-compose.yml").exists() and (
-        repository_root / "results"
-    ).exists()
-    assert development_layout or artifact_layout, "neither the development nor the artifact layout is present"
+    artifact_layout = (repository_root / "openwrt/docker-compose.yml").exists() and (repository_root / "results").exists()
+    assert development_layout or artifact_layout, "neither development nor artifact layout is present"
 
 
 def test_dib_package_imports() -> None:

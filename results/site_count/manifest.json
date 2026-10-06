@@ -1,0 +1,71 @@
+{
+  "caveats": [
+    "6 unexpected errors across 64400 timed operations of the sweep (N=2: 1 at 100 writers; N=5: 1 at 50 and 3 at 100; N=10: 1 at 100). Do not report the sweep as error-free.",
+    "'contribute' is a no-op in this harness and still counts in the throughput denominator (2 of every 20 timed operations).",
+    "Single host, 16 cores, no WAN latency: site containers share one machine's CPU and page cache, so this measures process-level separation, not geographic distribution.",
+    "Not comparable to experiments/35_v28_concurrency, which measures in-process SQLAlchemy service calls under a uniform six-operation mix.",
+    "N=1 is a degenerate topology retained as the sweep's baseline, not a supported deployment."
+  ],
+  "checksums": {
+    "code/scripts/distributed_concurrency_benchmark.py": "074455a03751d09075d670fa6cf9d15a6f6c8bbcceac9c2274b0e24eacc4a1dd",
+    "code/scripts/distributed_site_count_sweep.sh": "cb1b502b1a0984b275e383fada1123f92f25c0c503fbe865a33f1493da387770",
+    "code/src/dib/registry/distributed/Dockerfile": "47fddd49af2da4948926d9e6aa979428e52939e30a0fbea20098e7a6dcf9cc99",
+    "code/src/dib/registry/distributed/generate_compose.py": "e791bcb24193089291a7d88f6585e5aef168b19d5a6be32e1c38152dde64bcf4",
+    "code/src/dib/registry/distributed/service.py": "54f635cb4fa9ef5c90d1b3f7db785ff39d8c8805d20ce5f653edb85739f3a43b",
+    "experiments/39_distributed_site_count/site_count_summary.csv": "b6533b5199415c5a09a22d0916c791ca3db83d3cdf4768869cae07877399af4a",
+    "experiments/39_distributed_site_count/throughput_n1.csv": "1297852148971c30915825a91be13ac14b17b64c5a1763cda1532a3f30c8e903",
+    "experiments/39_distributed_site_count/throughput_n10.csv": "7fd875a9702951a9e8e1a4467478584b17fc69754a1e7ff081d4a212cd2f511e",
+    "experiments/39_distributed_site_count/throughput_n2.csv": "fd343ce7aa8bd21fdc7256b5649b410115333151a069d90ae324cb81971b5a4d",
+    "experiments/39_distributed_site_count/throughput_n5.csv": "b20d5673001c69c4f1a9191a9492fd4f8cfe5bdc827336eeb90cdedc9ba0e6dc"
+  },
+  "command": [
+    "bash code/scripts/distributed_site_count_sweep.sh"
+  ],
+  "config": {
+    "compose": "regenerated per N by generate_compose.py; containers torn down with volumes between topologies",
+    "n_sites_swept": [
+      1,
+      2,
+      5,
+      10
+    ],
+    "operation_mix": "_MIX_REALISTIC, 20 entries: query x8, commit x7, contribute x2, attest x1, dispute x1, restore x1",
+    "ops_per_worker": 20,
+    "repeats": 5,
+    "seed": 0,
+    "storage": "direct sqlite3 inside each container; no audit-history table",
+    "topology": "1 evidence container + N site containers",
+    "transport": "HTTP/TCP via httpx.Client, timeout 5.0 s",
+    "warmup_ops_per_worker": 20,
+    "worker_counts": "1,10,50,100",
+    "worker_routing": "worker_id % N_SITES"
+  },
+  "experiment": "distributed_site_count_sweep",
+  "findings": {
+    "best_ops_per_sec": 557.71,
+    "low_load_cost": "At one writer, ten sites are 20.6% slower than one (99.83 vs 125.67 ops/s): dispute and restore fan out synchronously to every site.",
+    "note": "The whole gain is realized at N=2; N=5 and N=10 do not improve on it. The shared evidence service, contacted by every site for attest/dispute/restore, is the remaining bottleneck.",
+    "single_site_saturation_ops_per_sec": 320.85,
+    "speedup_at_100_writers": {
+      "10": 1.63,
+      "2": 1.738,
+      "5": 1.682
+    },
+    "speedup_at_50_writers": {
+      "10": 1.734,
+      "2": 1.728,
+      "5": 1.754
+    }
+  },
+  "hardware": {
+    "cpu_count": 16,
+    "docker": "28.2.2",
+    "docker_compose": "2.40.3",
+    "platform": "Linux-6.8.12-18-pve-x86_64-with-glibc2.35",
+    "processor": "x86_64",
+    "python_implementation": "CPython",
+    "python_version": "3.10.13"
+  },
+  "label": "v33_equal_stack_site_count",
+  "purpose": "Isolate the contribution of distribution itself. Stack, transport, operation mix, worker counts, ops-per-worker, warm-up and repeat count are all held fixed; DIB_DIST_N_SITES is the single independent variable. This is the equal-stack comparison that the withdrawn single-node-vs-distributed throughput ratio could not provide."
+}

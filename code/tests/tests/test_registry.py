@@ -432,6 +432,46 @@ def test_global_restore_preserves_local_veto_and_its_history() -> None:
             session.close()
 
 
+def test_veto_recorded_during_shared_withdrawal_survives_restoration() -> None:
+    for dispute_count in (1, 2):
+        session = _fresh_session()
+        key = ("camera", "api.vendor.com", "https", 443)
+        try:
+            _seeded_score(session)
+            for site in ("site-a", "site-b"):
+                services.query_score(session, site, *key)
+                services.operator_commit(session, site, *key)
+            for reporter in ("site-b", "site-c")[:dispute_count]:
+                services.dispute_score(session, *key, reporter)
+                session.commit()
+            score = services.get_score(session, *key)
+            peer_state = services.get_local_decision(session, score.id, "site-b").state
+            shared_status = score.status
+            services.local_revoke(session, "site-a", *key)
+            session.commit()
+            assert score.status == shared_status
+            assert services.get_local_decision(session, score.id, "site-b").state == peer_state
+            try:
+                services.local_restore(session, "site-a", *key)
+                assert False, "local restore must not close a shared episode"
+            except services.InvalidStateTransition:
+                session.rollback()
+            services.restore_score(session, *key, actor_site_id="site-c")
+            session.commit()
+            assert services.get_local_decision(session, score.id, "site-a").state == db.DECISION_REVOKED
+            assert services.get_local_decision(session, score.id, "site-b").state == db.DECISION_MONITOR_ONLY
+            assert not services.export_active_mud(session, "site-a", key[0]).exported_endpoints
+            assert not services.export_active_mud(session, "site-b", key[0]).exported_endpoints
+            services.local_restore(session, "site-a", *key)
+            session.commit()
+            assert not services.export_active_mud(session, "site-a", key[0]).exported_endpoints
+            services.operator_commit(session, "site-a", *key)
+            session.commit()
+            assert len(services.export_active_mud(session, "site-a", key[0]).exported_endpoints) == 1
+        finally:
+            session.close()
+
+
 def test_restore_then_operator_commit_reenables_enforcement() -> None:
     session = _fresh_session()
     try:

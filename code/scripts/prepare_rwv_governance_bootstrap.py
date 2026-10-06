@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 from dataclasses import replace
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, "/root/Desktop/DIB/src")
 
 from dib.core.io import read_observations_csv, write_csv
 from dib.simulator.sites import partition_observations
@@ -22,9 +22,8 @@ from dib.simulator.sites import partition_observations
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--input", required=True,
-                   help="Enriched observations CSV derived from the licensed corpus.")
-    p.add_argument("--output-dir", default="outputs/rwv_baseline/governance_bootstrap")
+    p.add_argument("--input", default="/root/Desktop/DIB/data/processed/observations_enriched.csv")
+    p.add_argument("--output-dir", default="/root/Desktop/DIB_reframe/results/rwv_baseline/governance_bootstrap")
     p.add_argument("--seed", type=int, default=4201)
     p.add_argument("--total-sites", type=int, default=10)
     p.add_argument("--calibration-fraction", type=float, default=0.20,

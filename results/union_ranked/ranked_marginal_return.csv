@@ -1,0 +1,4 @@
+receiver,budget,confirmed_per_entry_in_prefix,confirmed_per_entry_in_next_block,marginal_drop_factor,confirmed_per_entry_whole_queue
+US,36,0.9722,0.6944,1.4,0.1831
+UK,43,0.907,0.6512,1.39,0.2321
+YT,107,0.3738,0.0561,6.67,0.0353

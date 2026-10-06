@@ -1,14 +1,14 @@
-Picked up JAVA_TOOL_OPTIONS: -Xmx4g -XX:+UseParallelGC
+[0.003s][warning][perf,memops] Cannot use file /tmp/hsperfdata_root/5 because it is locked by another process (errno = 11)
 TLC2 Version 2026.05.26.235334 (rev: 4ba7d88)
-Running breadth-first search Model-Checking with fp 29 and seed -7041804515716318545 with 4 workers on 16 cores with 3641MB heap and 64MB offheap memory [pid: 371938] (Linux 6.8.12-18-pve amd64, Ubuntu 17.0.19 64bit, MSBDiskFPSet, DiskStateQueue).
-Parsing file /root/Desktop/DIB_reframe/reproducibility/last_review/dib-tnsm-artifact/formal/DIB.tla
-Parsing file /tmp/tlc-10080379368341984957/Naturals.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
-Parsing file /tmp/tlc-10080379368341984957/FiniteSets.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
-Parsing file /tmp/tlc-10080379368341984957/_TLCTrace.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
-Parsing file /tmp/tlc-10080379368341984957/Sequences.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
-Parsing file /tmp/tlc-10080379368341984957/TLC.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
-Parsing file /tmp/tlc-10080379368341984957/TLCExt.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
-Parsing file /tmp/tlc-10080379368341984957/Integers.tla (jar:file:/root/Desktop/BioDevOps/formal_methods/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
+Running breadth-first search Model-Checking with fp 73 and seed -7774719964130688479 with 3 workers on 16 cores with 1963MB heap and 64MB offheap memory [pid: 5] (Linux 6.8.12-18-pve amd64, Ubuntu 17.0.19 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file /root/Desktop/DIB_reframe/reproducibility/experiments/43_v35_lifecycle/formal/DIB.tla
+Parsing file /tmp/tlc-4131387117587883251/Naturals.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /tmp/tlc-4131387117587883251/FiniteSets.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /tmp/tlc-4131387117587883251/_TLCTrace.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /tmp/tlc-4131387117587883251/Sequences.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /tmp/tlc-4131387117587883251/TLC.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /tmp/tlc-4131387117587883251/TLCExt.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/TLCExt.tla)
+Parsing file /tmp/tlc-4131387117587883251/Integers.tla (jar:file:/root/Desktop/BioDevOps/formal_artifacts/tools/tla2tools.jar!/tla2sany/StandardModules/Integers.tla)
 Semantic processing of module Naturals
 Semantic processing of module Sequences
 Semantic processing of module FiniteSets
@@ -20,17 +20,18 @@ Semantic processing of module DIB
 Linting of module TLCExt
 Linting of module _TLCTrace
 Linting of module DIB
-Starting... (2026-09-05 15:27:58)
+Starting... (2026-09-05 23:30:19)
 Computing initial states...
 Computed 2 initial states...
-Finished computing initial states: 4 distinct states generated at 2026-09-05 15:27:58.
-Progress(8) at 2026-09-05 15:28:01: 1,688,995 states generated (1,688,995 s/min), 145,602 distinct states found (145,602 ds/min), 85,112 states left on queue.
+Finished computing initial states: 4 distinct states generated at 2026-09-05 23:30:19.
+Progress(8) at 2026-09-05 23:30:22: 1,429,721 states generated (1,429,721 s/min), 114,938 distinct states found (114,938 ds/min), 64,686 states left on queue.
+Progress(14) at 2026-09-05 23:31:22: 43,284,414 states generated (41,854,693 s/min), 1,765,302 distinct states found (1,650,364 ds/min), 259,432 states left on queue.
 Model checking completed. No error has been found.
   Estimates of the probability that TLC did not check all reachable states
   because two distinct states had the same fingerprint:
-  calculated (optimistic):  val = 4.3E-6
-  based on the actual fingerprints:  val = 7.1E-8
-47110522 states generated, 1749604 distinct states found, 0 states left on queue.
+  calculated (optimistic):  val = 6.4E-6
+  based on the actual fingerprints:  val = 1.2E-7
+59248858 states generated, 2076196 distinct states found, 0 states left on queue.
 The depth of the complete state graph search is 21.
-The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 22 and the 95th percentile is 10).
-Finished in 53s at (2026-09-05 15:28:51)
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 26 and the 95th percentile is 10).
+Finished in 01min 25s at (2026-09-05 23:31:44)

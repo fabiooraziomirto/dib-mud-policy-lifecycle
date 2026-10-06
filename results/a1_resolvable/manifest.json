@@ -1,0 +1,61 @@
+{
+  "commands": [
+    [
+      "python3",
+      "scripts/a1_resolvable_counterfactual.py"
+    ]
+  ],
+  "config": {
+    "alpha": 0.6,
+    "beta": 0.4,
+    "device_types": [
+      "BelkinWemoMotionSensor",
+      "BelkinWemoSwitch",
+      "NetatmoWelcome",
+      "SamsungCamera",
+      "TPLinkSmartPlug"
+    ],
+    "gamma": 0.0,
+    "graph_enabled": false,
+    "k_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "min_reporting_sites": 2,
+    "seed": 42,
+    "site_count": 10,
+    "spread_days": [
+      1,
+      30,
+      120
+    ],
+    "theta": 0.65,
+    "trust_weighted": true
+  },
+  "experiment": "a1_resolvable_counterfactual",
+  "format_check": {
+    "ip_literal_destinations": 354,
+    "total_captured_packets": 354
+  },
+  "inputs": {
+    "attack_annotations_dir": "data/unsw_attack_2018/annotations",
+    "input_sha256": "e741b42656e81a1b128d0ecf9cfd6a85cc6dba39629cc22025a1bbef5fd61512",
+    "observations": "data/processed/observations_enriched.csv"
+  },
+  "metrics": {
+    "cells": 300,
+    "ip_literal_admitted": 0,
+    "ip_literal_cells": 150,
+    "resolved_fqdn_admitted": 21,
+    "resolved_fqdn_cells": 150,
+    "wall_seconds": 1418.9
+  }
+}

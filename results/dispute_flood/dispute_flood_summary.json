@@ -1,0 +1,79 @@
+{
+  "facts": 100,
+  "sites": 10,
+  "setup_requests": 2100,
+  "attacker": {
+    "identities": 1,
+    "threads": 1,
+    "requests": 100,
+    "disputes_applied": 100,
+    "wall_s": 11.3331,
+    "disputes_per_s": 8.82,
+    "mean_dispute_ms": 113.3,
+    "p99_dispute_ms": 167.84,
+    "requests_per_fact_suspended": 1.0,
+    "site_records_suspended": 1000
+  },
+  "blast_radius": {
+    "exported_aces_per_site_before": [
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "exported_aces_per_site_after": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "exported_aces_per_site_after_recovery": [
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100
+    ]
+  },
+  "legitimate_load": {
+    "baseline": {
+      "phase": "quiet_baseline",
+      "ops": 400,
+      "wall_s": 0.9252,
+      "throughput_ops_per_s": 432.33,
+      "p50_ms": 13.94,
+      "p99_ms": 30.63
+    },
+    "under_flood": {
+      "phase": "under_flood",
+      "ops": 400,
+      "wall_s": 1.0929,
+      "throughput_ops_per_s": 366.0,
+      "p50_ms": 15.72,
+      "p99_ms": 38.98
+    }
+  },
+  "recovery": {
+    "requests": 1100,
+    "restore_only_wall_s": 10.514,
+    "wall_s": 21.5622,
+    "requests_per_fact": 11.0
+  }
+}

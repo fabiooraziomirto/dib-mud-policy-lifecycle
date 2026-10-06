@@ -1,0 +1,735 @@
+{
+  "scope": "three site processes plus evidence; loopback HTTP; process kill/restart; persistent SQLite; MUD export; no gateway timing",
+  "python": "3.10.13",
+  "service_sha256": "d09f8db508306344b374b80513e0bb36d35047c062917dc1d984ebf9d58429a3",
+  "script_sha256": "ae9fc1431bf98f410b1c521bd48825386146f04a3ad06186d1807f1fcd006cf8",
+  "trials": [
+    {
+      "trial": 0,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 1,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 2,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 1,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 4,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 5,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 2,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 7,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 8,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 3,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 10,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 11,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 4,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 13,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 14,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 5,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 16,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 17,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 6,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 19,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 20,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 7,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 22,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 23,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 8,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 25,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 26,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    },
+    {
+      "trial": 9,
+      "before": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 0
+        },
+        "active": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "pending": [
+        {
+          "score_id": 28,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        },
+        {
+          "score_id": 29,
+          "seq": 3,
+          "event_type": "restore",
+          "target_state": "monitor-only"
+        }
+      ],
+      "after": {
+        "veto": {
+          "state": "revoked",
+          "origin": "local",
+          "last_applied_seq": 3
+        },
+        "active": {
+          "state": "monitor-only",
+          "origin": null,
+          "last_applied_seq": 3
+        },
+        "unrelated": {
+          "state": "active",
+          "origin": null,
+          "last_applied_seq": 0
+        }
+      },
+      "exports_after_reconcile": {
+        "veto": [
+          0,
+          0,
+          0
+        ],
+        "active": [
+          0,
+          0,
+          0
+        ],
+        "unrelated": [
+          1,
+          1,
+          1
+        ]
+      },
+      "repeated_reconcile_noop": true,
+      "stale_replay_ignored": true,
+      "direct_commit_over_veto_blocked": true,
+      "explicit_recovery_passed": true
+    }
+  ],
+  "summary": {
+    "trials": 10,
+    "vetoes_preserved": 10,
+    "stale_approvals_cleared": 10,
+    "unrelated_facts_preserved": 10,
+    "explicit_recoveries_passed": 10
+  }
+}

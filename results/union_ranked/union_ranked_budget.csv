@@ -1,0 +1,4 @@
+receiver,budget,union_queue,union_confirmed_total,dib_queue,dib_confirmed,union_ranked_expected,union_ranked_best,union_ranked_worst,union_arbitrary_expected,dib_minus_ranked_expected,ranked_union_depth_for_dib_yield,ranked_reviews_per_confirmed,dib_reviews_per_confirmed,dib_queue_minus_ranked_depth
+US,36,1005,184,36,35,35.0,35,35,6.591,0.0,36,1.029,1.029,0
+UK,43,767,178,43,37,39.0,39,39,9.979,-2.0,41,1.103,1.162,2
+YT,107,1387,49,107,37,40.0,40,40,3.78,-3.0,85,2.675,2.892,22

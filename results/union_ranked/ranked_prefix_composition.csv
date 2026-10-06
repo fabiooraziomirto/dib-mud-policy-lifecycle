@@ -1,0 +1,16 @@
+receiver,budget,stage,entries,confirmed,share_of_prefix
+US,36,admitted by DIB,32,31,0.8889
+US,36,below threshold,0,0,0.0
+US,36,fails quorum,0,0,0.0
+US,36,fails class gate,4,4,0.1111
+US,36,single-reporter (subset),0,0,0.0
+UK,43,admitted by DIB,39,35,0.907
+UK,43,below threshold,0,0,0.0
+UK,43,fails quorum,0,0,0.0
+UK,43,fails class gate,4,4,0.093
+UK,43,single-reporter (subset),0,0,0.0
+YT,107,admitted by DIB,93,36,0.8692
+YT,107,below threshold,0,0,0.0
+YT,107,fails quorum,0,0,0.0
+YT,107,fails class gate,14,4,0.1308
+YT,107,single-reporter (subset),0,0,0.0

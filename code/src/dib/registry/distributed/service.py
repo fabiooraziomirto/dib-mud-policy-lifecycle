@@ -66,6 +66,9 @@ _FANOUT_TIMEOUT_S = 1.0
 
 DATA_DIR = Path(os.environ.get("DIB_DIST_DATA_DIR", "/data"))
 N_SITES = int(os.environ.get("DIB_DIST_N_SITES", "10"))
+SUSPENSION_QUORUM = int(os.environ.get("DIB_DIST_SUSPENSION_QUORUM", "1"))
+if SUSPENSION_QUORUM not in (1, 2):
+    raise ValueError("DIB_DIST_SUSPENSION_QUORUM must be 1 or 2")
 ROLE = os.environ.get("DIB_DIST_ROLE", "site")  # "site" or "evidence"
 SITE_INDEX = int(os.environ.get("DIB_DIST_SITE_INDEX", "0"))
 EVIDENCE_URL = os.environ.get("DIB_DIST_EVIDENCE_URL", "http://evidence:8000")
@@ -209,8 +212,11 @@ if ROLE == "site":
             raise HTTPException(404, "unknown fact")
 
         def txn(con):
-            row = con.execute("SELECT state FROM local_decisions WHERE score_id=?", (score["id"],)).fetchone()
-            if row is None or row[0] not in (DECISION_MONITOR_ONLY, DECISION_ACTIVE):
+            row = con.execute("SELECT state, origin FROM local_decisions WHERE score_id=?", (score["id"],)).fetchone()
+            if row is None or not (
+                row[0] in (DECISION_MONITOR_ONLY, DECISION_ACTIVE, DECISION_DISPUTED)
+                or (row[0] == DECISION_REVOKED and row[1] == ORIGIN_FANOUT)
+            ):
                 raise HTTPException(409, f"cannot local-revoke: state is {row[0] if row else None!r}")
             con.execute(
                 "UPDATE local_decisions SET state=?, origin=? WHERE score_id=?",
@@ -322,6 +328,8 @@ if ROLE == "evidence":
             " accepted INTEGER DEFAULT 1, UNIQUE(device_type, endpoint, protocol, port))",
             "CREATE TABLE IF NOT EXISTS pending_fanout (site_id TEXT, score_id INTEGER, seq INTEGER,"
             " event_type TEXT, target_state TEXT, PRIMARY KEY (site_id, score_id))",
+            "CREATE TABLE IF NOT EXISTS suspension_reports ("
+            " score_id INTEGER, site_id TEXT NOT NULL, PRIMARY KEY (score_id, site_id))",
         ],
     )
 
@@ -418,12 +426,21 @@ if ROLE == "evidence":
 
     @app.post("/dispute")
     def dispute(req: ActionReq):
+        # Identity is supplied by the trusted harness; deployment authentication
+        # remains outside this prototype. Duplicate reports never add a vote.
+        if not req.site_id:
+            raise HTTPException(422, "a reporting site is required")
         def txn(con):
             row = _get_score_row(con, req.device_type, req.endpoint, req.protocol, req.port)
             if row is None:
                 raise HTTPException(404, "unknown fact")
             score_id, status, disputed_by, seq, _accepted = row
             if status == STATUS_ACTIVE:
+                if SUSPENSION_QUORUM == 2:
+                    con.execute("INSERT OR IGNORE INTO suspension_reports VALUES (?, ?)", (score_id, req.site_id))
+                    votes = con.execute("SELECT COUNT(*) FROM suspension_reports WHERE score_id=?", (score_id,)).fetchone()[0]
+                    if votes < SUSPENSION_QUORUM:
+                        return None
                 new_seq = seq + 1
                 con.execute(
                     "UPDATE scores SET status=?, disputed_by=?, fanout_seq=? WHERE id=?",
@@ -455,6 +472,7 @@ if ROLE == "evidence":
                 "UPDATE scores SET status=?, disputed_by=NULL, fanout_seq=? WHERE id=?",
                 (STATUS_ACTIVE, new_seq, score_id),
             )
+            con.execute("DELETE FROM suspension_reports WHERE score_id=?", (score_id,))
             return score_id, new_seq
 
         score_id, new_seq = _evidence_db.run(txn)

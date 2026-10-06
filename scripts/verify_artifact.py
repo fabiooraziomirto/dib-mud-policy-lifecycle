@@ -2,7 +2,7 @@
 """Recompute every headline number of the paper from the stored evidence.
 
 Each check reads a file under results/ or formal/ and asserts the value printed
-in paper/main.tex (v31.1). Failure means the artifact and the paper disagree.
+for v42.0. Checks cover the indexed headline evidence, not every sentence.
 
 Usage:  python scripts/verify_artifact.py [--with-tests]
 """
@@ -11,6 +11,8 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import hashlib
+import os
 import re
 import subprocess
 import sys
@@ -47,27 +49,28 @@ def check_formal() -> None:
     print("\nRQ1 finite model and registry")
     base = text("formal/logs/full_lifecycle.log")
     states = int(re.search(r"([\d,]+) states generated, ([\d,]+) distinct", base).group(2).replace(",", ""))
-    check("base model distinct reachable states", states, 3837084)
+    check("base model distinct reachable states", states, 4311852)
     check("base model has no counterexample", "No error has been found" in base, True)
 
     ev = text("formal/logs/evidence_only.log")
     ev_states = int(re.search(r"([\d,]+) states generated, ([\d,]+) distinct", ev).group(2).replace(",", ""))
-    check("no-commit model distinct states", ev_states, 1749604)
+    check("no-commit model distinct states", ev_states, 2076196)
+    check("no-commit model has no counterexample", "No error has been found" in ev, True)
 
     dist = text("formal/logs/distributed_extension.log")
     gen, distinct = re.search(r"([\d,]+) states generated, ([\d,]+) distinct", dist).groups()
-    check("distributed extension states generated", int(gen.replace(",", "")), 718571)
-    check("distributed extension distinct states", int(distinct.replace(",", "")), 44610)
+    check("distributed extension states generated", int(gen.replace(",", "")), 815335)
+    check("distributed extension distinct states", int(distinct.replace(",", "")), 48960)
     check("distributed extension depth", int(re.search(r"depth of the complete state graph search is (\d+)", dist).group(1)), 18)
     check("distributed extension has no counterexample", "No error has been found" in dist, True)
 
-    for name in ("m1_restore_recreates_grant", "m2_commit_escapes_site", "m3_export_while_disputed",
-                 "m4_local_restore_ignores_dispute", "m5_local_revoke_escapes_site",
-                 "m6_global_restore_clears_local_revoke"):
-        log = text(f"formal/logs/mutation_{name}.log")
-        check(f"mutation {name} is refuted", "Error:" in log or "is violated" in log, True)
+    for i, prop in enumerate(("AuthorizationStateCoherence", "I2_SiteConfinement", "ExportRequiresActive",
+                             "DisputeSuspendsEverywhere", "I2_LocalRevokeConfinement",
+                             "I3_GlobalRestorePreservesLocalRevoke"), 1):
+        log = text(f"formal/mutations/m{i}/result.log")
+        check(f"mutation m{i} violates {prop}", f"{prop} is violated" in log, True)
 
-    check("registry regression passes after the fix", "33 passed" in text("formal/logs/regression_after.log"), True)
+    check("focused registry/rescoring regression passes", "39 passed" in text("results/lifecycle_v35/regression.log"), True)
 
     campaign = json.loads(text("results/openwrt/campaign-10runs/campaign_summary.json"))
     check("OpenWrt campaign completed runs", campaign["completed_runs"], 10)
@@ -114,6 +117,38 @@ def check_utility() -> None:
     check("equal-budget yield ratio, minimum", round(min(ratios), 1), 3.7, 0.05)
     check("equal-budget yield ratio, maximum", round(max(ratios), 1), 9.8, 0.05)
 
+    ranked = {r["receiver"]: r for r in rows("results/union_ranked/union_ranked_budget.csv")}
+    concentration = []
+    for receiver, exp_ranked, exp_dib, exp_gap in (("US", 35.0, 35, 0), ("UK", 39.0, 37, 2), ("YT", 40.0, 37, 22)):
+        row = ranked[receiver]
+        check(f"{receiver} score-ranked union yield at budget",
+              float(row["union_ranked_expected"]), exp_ranked, 0.05)
+        check(f"{receiver} score-ranked union tie-breaking is determinate",
+              float(row["union_ranked_best"]) == float(row["union_ranked_worst"]), True)
+        check(f"{receiver} full-DIB confirmed at budget", int(row["dib_confirmed"]), exp_dib)
+        check(f"{receiver} DIB queue minus shortest ranked prefix at equal yield",
+              int(row["dib_queue_minus_ranked_depth"]), exp_gap)
+        concentration.append(float(row["union_ranked_expected"]) / float(row["union_arbitrary_expected"]))
+    check("score-ranked over arbitrary order, minimum", round(min(concentration), 1), 3.9, 0.05)
+    check("score-ranked over arbitrary order, maximum", round(max(concentration), 1), 10.6, 0.05)
+
+    comp = rows("results/union_ranked/ranked_prefix_composition.csv")
+    shares = []
+    for receiver in ("US", "UK", "YT"):
+        pref = {r["stage"]: r for r in comp if r["receiver"] == receiver}
+        shares.append(100 * float(pref["admitted by DIB"]["share_of_prefix"]))
+        check(f"{receiver} ranked prefix: entries below theta", int(pref["below threshold"]["entries"]), 0)
+        check(f"{receiver} ranked prefix: entries failing quorum", int(pref["fails quorum"]["entries"]), 0)
+        check(f"{receiver} ranked prefix: single-reporter entries",
+              int(pref["single-reporter (subset)"]["entries"]), 0)
+    check("ranked prefix admitted by DIB, minimum (%)", round(min(shares), 1), 86.9, 0.05)
+    check("ranked prefix admitted by DIB, maximum (%)", round(max(shares), 1), 90.7, 0.05)
+
+    marg = {r["receiver"]: r for r in rows("results/union_ranked/ranked_marginal_return.csv")}
+    for receiver, drop in (("US", 1.4), ("UK", 1.4), ("YT", 6.7)):
+        check(f"{receiver} marginal drop past the DIB cut",
+              round(float(marg[receiver]["marginal_drop_factor"]), 1), drop, 0.05)
+
     matched = rows("results/three_lab_matched/matched_ablation.csv")
     for receiver, expected_reduction, expected_n in (("US", 96.4, 36), ("UK", 94.4, 43), ("YT", 92.3, 107)):
         row = next(r for r in matched if r["receiver"] == receiver and r["stage"] == "DIB")
@@ -152,6 +187,23 @@ def check_scalability() -> None:
     check("single-node p99 at 1 writer (ms)", round(1000 * float(single["1"]["p99_latency_s_mean"]), 1), 5.3, 0.05)
     check("no unexpected errors", all(int(r["unexpected_errors"]) == 0 for r in single.values()), True)
 
+    sweep = {(int(r["n_sites"]), int(r["n_workers"])): r
+             for r in rows("results/site_count/site_count_summary.csv")}
+    check("one site container saturates (ops/s at 100 writers)",
+          round(float(sweep[(1, 100)]["throughput_ops_per_sec"]), 1), 320.9, 0.05)
+    check("one site container gains nothing from 50 to 100 writers",
+          float(sweep[(1, 100)]["throughput_ops_per_sec"]) - float(sweep[(1, 50)]["throughput_ops_per_sec"]) < 5.0, True)
+    speedups = [float(sweep[(n, w)]["speedup_vs_1_site"]) for n in (2, 5, 10) for w in (50, 100)]
+    check("distribution speed-up at 50/100 writers, minimum", round(min(speedups), 2), 1.63, 0.005)
+    check("distribution speed-up at 50/100 writers, maximum", round(max(speedups), 2), 1.75, 0.005)
+    check("whole gain realized at two sites",
+          float(sweep[(2, 100)]["throughput_ops_per_sec"]) >= float(sweep[(10, 100)]["throughput_ops_per_sec"]), True)
+    check("ten sites are slower than one at a single writer (%)",
+          round(100 * (1 - float(sweep[(10, 1)]["throughput_ops_per_sec"])
+                       / float(sweep[(1, 1)]["throughput_ops_per_sec"])), 1), 20.6, 0.05)
+    check("sweep unexpected errors", sum(int(r["unexpected_errors"]) for r in
+          rows("results/site_count/site_count_summary.csv")), 6)
+
     inv = rows("results/concurrency/invariants_v28_correctness.csv")
     check("correctness trials", sum(int(r["trials"]) for r in inv), 1825)
     check("invariant violations", sum(int(r["violations"]) for r in inv), 0)
@@ -173,7 +225,7 @@ def check_scalability() -> None:
 def check_claims_index() -> None:
     print("\nClaim index")
     claims = json.loads(text("claims.json"))
-    check("paper version", claims["paper_version"], "v32.0")
+    check("paper version", claims["paper_version"], "v42.0")
     check("selected configuration is graph-free", "gamma: 0" in text(claims["selected_configuration"]), True)
     missing = [p for c in claims["claims"] for p in (x.strip() for x in c["result"].split(","))
                if not (ROOT / p).exists()]
@@ -184,12 +236,112 @@ def run_unit_tests() -> None:
     print("\nUnit suite")
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "code/tests", "-q"],
-        cwd=ROOT, env={"PYTHONPATH": str(ROOT / "code" / "src"), "PATH": "/usr/bin:/bin"},
+        cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "code" / "src")},
         capture_output=True, text=True,
     )
     tail = result.stdout.strip().splitlines()[-1] if result.stdout.strip() else result.stderr[-200:]
     check("pytest exits cleanly", result.returncode, 0)
     print("  " + tail)
+
+
+def check_new_lifecycle() -> None:
+    print("\nRestoration-policy and suspension campaigns")
+    result = json.loads(text("results/restore_ablation/results.json"))
+    check("ablation source matches packaged service", result["service_sha256"],
+          hashlib.sha256((ROOT / "code/src/dib/registry/distributed/service.py").read_bytes()).hexdigest())
+    check("ablation script matches packaged generator", result["script_sha256"],
+          hashlib.sha256((ROOT / "code/scripts/v36_restore_ablation.py").read_bytes()).hexdigest())
+    check("distinct policy/scenario combinations", len({(c['policy'], c['veto_time'], c['disconnected']) for c in result['cases']}), 18)
+    check("case count", len(result['cases']), 18)
+    for policy, ace_count, veto_count in (("persistent_approval", 12, 6), ("review_reset", 0, 0), ("dib", 0, 6)):
+        cases = [c for c in result['cases'] if c['policy'] == policy]
+        check(f"{policy}: six sequences", len(cases), 6)
+        check(f"{policy}: subject ACEs without new commit", sum(c['exports_without_fresh_commit'] for c in cases), ace_count)
+        check(f"{policy}: vetoes preserved", sum(c['local_veto_preserved'] for c in cases), veto_count)
+        for c in cases:
+            final = next(t for t in c['trace'] if t['event'] == 'restored_and_reconciled')
+            check(f"{policy}/{c['veto_time']}/{c['disconnected']}: export trace", sum(final['subject_aces']), c['exports_without_fresh_commit'])
+            check(f"{policy}/{c['veto_time']}/{c['disconnected']}: control trace", all(t['control_aces'] == [1, 1, 1] for t in c['trace']), True)
+    api = json.loads(text('results/lifecycle_v35/api_campaign.json'))
+    for p in api['policies']:
+        q = p['suspension_quorum']
+        check(f'q={q}: first reporter', p['aces_after_one_reporter_per_site'], [0 if q == 1 else 100] * 10)
+        check(f'q={q}: second reporter', p['aces_after_two_reporters_per_site'], [0] * 10)
+        check(f'q={q}: local vetoes', p['local_vetoes_preserved'], 100)
+        check(f'q={q}: duplicate votes', p['duplicate_reports_add_votes'], False)
+        check(f'q={q}: fresh commits', p['restoration_requires_new_commits'], True)
+        check(f'q={q}: old votes cleared', p['old_votes_cleared'], True)
+    flood = json.loads(text('results/dispute_flood/dispute_flood_summary.json'))
+    check('flood: authorizations suspended', flood['attacker']['site_records_suspended'], 1000)
+    check('flood: withdrawal seconds', round(flood['attacker']['wall_s'], 1), 11.3)
+    check('flood: recovery seconds', round(flood['recovery']['wall_s'], 1), 21.6)
+    check('flood: recovery requests per fact', flood['recovery']['requests_per_fact'], 11)
+
+
+# --- v42.0 additions: A1 resolved-peer counterfactual, Pareto frontier,
+# and local veto across a process outage --------------------------------
+def check_v42_additions() -> None:
+    print("\nv42.0 additions")
+
+    a1 = rows("results/a1_resolvable/a1_resolvable_counterfactual.csv")
+    ip_literal = [r for r in a1 if r["peer_form"] == "ip_literal"]
+    resolved = [r for r in a1 if r["peer_form"] == "resolved_fqdn"]
+    check("A1 counterfactual: ip-literal cells", len(ip_literal), 150)
+    check("A1 counterfactual: resolved-name cells", len(resolved), 150)
+    check("A1 counterfactual: ip-literal admitted", sum(r["accepted"] == "True" for r in ip_literal), 0)
+    check("A1 counterfactual: resolved-name admitted", sum(r["accepted"] == "True" for r in resolved), 21)
+    first_admit = min(
+        (r for r in resolved if r["accepted"] == "True"),
+        key=lambda r: (int(r["k"]), int(r["spread_days"])),
+    )
+    check("A1 counterfactual: first admission k", int(first_admit["k"]), 7)
+    check("A1 counterfactual: first admission spread_days", int(first_admit["spread_days"]), 120)
+    check("A1 counterfactual: first admission score", round(float(first_admit["score"]), 3), 0.679)
+    a1_manifest = json.loads(text("results/a1_resolvable/manifest.json"))
+    check("A1 counterfactual: raw captured packets are IP-literal",
+          a1_manifest["format_check"]["ip_literal_destinations"], 354)
+    check("A1 counterfactual: total captured packets",
+          a1_manifest["format_check"]["total_captured_packets"], 354)
+
+    sweep = rows("results/pareto_frontier/sweep.csv")
+    operating = {r["receiver"]: r for r in sweep if r["is_operating_point"] == "True"}
+    check("Pareto frontier: sweep cells", len(sweep), 78)
+    expected_operating = {
+        "US": (36, 0.065, 0.116),
+        "UK": (43, 0.064, 0.115),
+        "YT": (107, 0.223, 0.247),
+    }
+    for receiver, (n, recall, f1) in expected_operating.items():
+        r = operating[receiver]
+        check(f"Pareto frontier {receiver}: operating-point queue size", int(r["queue_size"]), n)
+        check(f"Pareto frontier {receiver}: operating-point recall", round(float(r["recall"]), 3), recall, 0.001)
+        check(f"Pareto frontier {receiver}: operating-point F1", round(float(r["f1"]), 3), f1, 0.001)
+
+    ov = json.loads(text("results/offline_veto/results.json"))
+    check("offline veto: script matches packaged generator", ov["script_sha256"],
+          hashlib.sha256((ROOT / "code/scripts/offline_veto_reconciliation.py").read_bytes()).hexdigest())
+    check("offline veto: service matches packaged distributed service", ov["service_sha256"],
+          hashlib.sha256((ROOT / "code/src/dib/registry/distributed/service.py").read_bytes()).hexdigest())
+    check("offline veto: trial count", len(ov["trials"]), 10)
+    check("offline veto: vetoes preserved", ov["summary"]["vetoes_preserved"], 10)
+    check("offline veto: stale approvals cleared", ov["summary"]["stale_approvals_cleared"], 10)
+    check("offline veto: unrelated facts preserved", ov["summary"]["unrelated_facts_preserved"], 10)
+    check("offline veto: explicit recoveries passed", ov["summary"]["explicit_recoveries_passed"], 10)
+    for t in ov["trials"]:
+        check(f"offline veto trial {t['trial']}: veto survives with local origin",
+              t["after"]["veto"]["origin"], "local")
+        check(f"offline veto trial {t['trial']}: stale Active returns to MonitorOnly",
+              t["after"]["active"]["state"], "monitor-only")
+        check(f"offline veto trial {t['trial']}: neither vetoed nor stale fact exports",
+              t["exports_after_reconcile"]["veto"] == [0, 0, 0] and t["exports_after_reconcile"]["active"] == [0, 0, 0], True)
+        check(f"offline veto trial {t['trial']}: unrelated fact exports everywhere",
+              t["exports_after_reconcile"]["unrelated"], [1, 1, 1])
+        check(f"offline veto trial {t['trial']}: repeated reconcile is a no-op",
+              t["repeated_reconcile_noop"], True)
+        check(f"offline veto trial {t['trial']}: stale replay ignored",
+              t["stale_replay_ignored"], True)
+        check(f"offline veto trial {t['trial']}: direct commit over veto blocked",
+              t["direct_commit_over_veto_blocked"], True)
 
 
 def main() -> int:
@@ -202,6 +354,8 @@ def main() -> int:
     check_utility()
     check_security()
     check_scalability()
+    check_new_lifecycle()
+    check_v42_additions()
     if args.with_tests:
         run_unit_tests()
 

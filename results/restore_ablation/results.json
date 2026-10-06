@@ -1,0 +1,4023 @@
+{
+  "scope": "deterministic sequential API/SQLite/MUD ablation; synthetic facts; no timing or gateway claims",
+  "service_sha256": "d09f8db508306344b374b80513e0bb36d35047c062917dc1d984ebf9d58429a3",
+  "script_sha256": "8387487e799871a4a5ba1bdc1dfbfbe494d4922cba428afeeff83f8ddff51266",
+  "cases": [
+    {
+      "policy": "persistent_approval",
+      "veto_time": "before",
+      "disconnected": false,
+      "exports_without_fresh_commit": 2,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "persistent_approval",
+      "veto_time": "before",
+      "disconnected": true,
+      "exports_without_fresh_commit": 2,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "persistent_approval",
+      "veto_time": "during",
+      "disconnected": false,
+      "exports_without_fresh_commit": 2,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "persistent_approval",
+      "veto_time": "during",
+      "disconnected": true,
+      "exports_without_fresh_commit": 2,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "persistent_approval",
+      "veto_time": "confirmed",
+      "disconnected": false,
+      "exports_without_fresh_commit": 2,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "persistent_approval",
+      "veto_time": "confirmed",
+      "disconnected": true,
+      "exports_without_fresh_commit": 2,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "review_reset",
+      "veto_time": "before",
+      "disconnected": false,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": false,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "review_reset",
+      "veto_time": "before",
+      "disconnected": true,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": false,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "review_reset",
+      "veto_time": "during",
+      "disconnected": false,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": false,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "review_reset",
+      "veto_time": "during",
+      "disconnected": true,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": false,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "review_reset",
+      "veto_time": "confirmed",
+      "disconnected": false,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": false,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "review_reset",
+      "veto_time": "confirmed",
+      "disconnected": true,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": false,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "dib",
+      "veto_time": "before",
+      "disconnected": false,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "dib",
+      "veto_time": "before",
+      "disconnected": true,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "dib",
+      "veto_time": "during",
+      "disconnected": false,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "dib",
+      "veto_time": "during",
+      "disconnected": true,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "dib",
+      "veto_time": "confirmed",
+      "disconnected": false,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "policy": "dib",
+      "veto_time": "confirmed",
+      "disconnected": true,
+      "exports_without_fresh_commit": 0,
+      "local_veto_preserved": true,
+      "stale_replay_ignored": true,
+      "unrelated_fact_preserved": true,
+      "explicit_recovery_passed": true,
+      "trace": [
+        {
+          "event": "initial_commit",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "first_dispute",
+          "states": [
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "disputed",
+              "origin": null,
+              "last_applied_seq": 1
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "confirming_dispute",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "local_veto",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "revoked",
+              "origin": "fanout",
+              "last_applied_seq": 2
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "global_restore",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 0
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "restored_and_reconciled",
+          "states": [
+            {
+              "state": "revoked",
+              "origin": "local",
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "monitor-only",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            0,
+            0,
+            0
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "event": "explicit_recovery",
+          "states": [
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            },
+            {
+              "state": "active",
+              "origin": null,
+              "last_applied_seq": 3
+            }
+          ],
+          "subject_aces": [
+            1,
+            1,
+            1
+          ],
+          "control_aces": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "policy": "persistent_approval",
+      "cases": 6,
+      "exports_without_fresh_commit": 12,
+      "vetoes_preserved": 6
+    },
+    {
+      "policy": "review_reset",
+      "cases": 6,
+      "exports_without_fresh_commit": 0,
+      "vetoes_preserved": 0
+    },
+    {
+      "policy": "dib",
+      "cases": 6,
+      "exports_without_fresh_commit": 0,
+      "vetoes_preserved": 6
+    }
+  ]
+}
